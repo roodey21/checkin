@@ -237,12 +237,12 @@ export default function SeatSelectionPage() {
       {/* Header */}
       <div className="w-full flex flex-col md:flex-row justify-between items-center mb-8 gap-4 pb-6 border-b border-slate-800">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-sky-500/10 rounded-xl border border-sky-500/20">
-            <Plane className="w-6 h-6 text-sky-400 rotate-45" />
+          <div className="p-2.5 bg-orange-500/10 rounded-xl border border-orange-500/20">
+            <Plane className="w-6 h-6 text-orange-400 rotate-45" />
           </div>
           <div>
             <h1 className="text-lg font-bold text-white leading-tight">Pilih Tempat Duduk</h1>
-            <p className="text-xs text-slate-400">Selamat datang, <span className="text-sky-400 font-semibold">{participant.nama}</span> ({participant.kategori.toUpperCase()})</p>
+            <p className="text-xs text-slate-400">Selamat datang, <span className="text-orange-400 font-semibold">{participant.nama}</span> ({participant.kategori.toUpperCase()})</p>
           </div>
         </div>
 

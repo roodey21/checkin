@@ -172,22 +172,29 @@ export async function sendEmailsAction() {
         const htmlContent = `
           <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0f172a; color: #f8fafc; padding: 40px 20px; max-width: 600px; margin: 0 auto; border-radius: 12px; border: 1px solid #1e293b;">
             <div style="text-align: center; margin-bottom: 30px;">
-              <span style="font-size: 12px; font-weight: 700; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.1em;">PTPN Finance & Risk Leaders Forum 2026</span>
-              <h2 style="font-size: 24px; font-weight: 800; color: #ffffff; margin-top: 10px; margin-bottom: 5px;">Undangan Web Check-in</h2>
-              <div style="height: 2px; width: 60px; background-color: #38bdf8; margin: 15px auto;"></div>
+              <span style="font-size: 10px; font-weight: 800; color: #f97316; text-transform: uppercase; letter-spacing: 0.15em;">Danantara Indonesia & Perkebunan Nusantara</span>
+              <h2 style="font-size: 22px; font-weight: 800; color: #ffffff; margin-top: 10px; margin-bottom: 5px; text-transform: uppercase;">PTPN Finance & Risk Leaders Forum 2026</h2>
+              <p style="font-size: 11px; color: #94a3b8; font-style: italic; margin-top: 5px; margin-bottom: 10px;">"Navigating The New Era of Financial Excellence"</p>
+              <div style="height: 2px; width: 60px; background-color: #f97316; margin: 15px auto;"></div>
             </div>
 
             <div style="background-color: #1e293b; padding: 25px; border-radius: 8px; border: 1px solid #334155; margin-bottom: 35px;">
               <p style="margin-top: 0; font-size: 16px; line-height: 1.6; color: #e2e8f0;">Halo <strong>${p.nama}</strong>,</p>
-              <p style="font-size: 14px; line-height: 1.6; color: #94a3b8;">Anda terdaftar sebagai peserta dalam forum dengan kategori kelas <strong>${p.kategori.toUpperCase()}</strong>. Silakan lakukan proses check-in penerbangan/tempat duduk Anda menggunakan kode booking di bawah ini:</p>
+              <p style="font-size: 14px; line-height: 1.6; color: #94a3b8;">Anda terdaftar sebagai peserta forum dengan kategori kelas <strong>${p.kategori.toUpperCase()}</strong>. Detail acara:</p>
+              <ul style="font-size: 13px; color: #cbd5e1; line-height: 1.6; padding-left: 20px; margin: 10px 0;">
+                <li><strong>Tanggal:</strong> 11-12 Juni 2026</li>
+                <li><strong>Waktu:</strong> 08:00 - 17:00 WIB</li>
+                <li><strong>Tempat:</strong> PT. LPP Agro Nusantara</li>
+              </ul>
+              <p style="font-size: 14px; line-height: 1.6; color: #94a3b8;">Silakan lakukan proses check-in tempat duduk Anda menggunakan kode booking di bawah ini:</p>
               
-              <div style="text-align: center; margin: 25px 0; background-color: #0f172a; padding: 15px; border-radius: 6px; border: 1px dashed #38bdf8;">
-                <span style="display: block; font-size: 12px; color: #94a3b8; text-transform: uppercase; margin-bottom: 5px;">Kode Booking Anda</span>
-                <span style="font-size: 32px; font-weight: 800; color: #38bdf8; letter-spacing: 4px; font-family: monospace;">${p.booking_code}</span>
+              <div style="text-align: center; margin: 25px 0; background-color: #0f172a; padding: 15px; border-radius: 6px; border: 1px dashed #f97316;">
+                <span style="display: block; font-size: 11px; color: #94a3b8; text-transform: uppercase; margin-bottom: 5px;">Kode Booking Anda</span>
+                <span style="font-size: 32px; font-weight: 800; color: #f97316; letter-spacing: 4px; font-family: monospace;">${p.booking_code}</span>
               </div>
               
               <div style="text-align: center; margin-top: 30px;">
-                <a href="${checkinUrl}" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: #ffffff; padding: 12px 30px; font-size: 14px; font-weight: 600; text-decoration: none; border-radius: 6px; display: inline-block; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">Mulai Check-in Sekarang</a>
+                <a href="${checkinUrl}" style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: #ffffff; padding: 12px 30px; font-size: 14px; font-weight: 600; text-decoration: none; border-radius: 6px; display: inline-block; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);">Mulai Check-in Sekarang</a>
               </div>
             </div>
 

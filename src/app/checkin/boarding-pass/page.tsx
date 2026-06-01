@@ -126,7 +126,7 @@ export default function BoardingPassPage() {
           style={{ fontFamily: 'sans-serif' }}
         >
           {/* Accent decoration */}
-          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-sky-400 to-indigo-500"></div>
+          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-orange-500 to-amber-500"></div>
 
           {/* LEFT: MAIN PASSENGER BOARDING CARD (70%) */}
           <div className="w-[70%] p-6 flex flex-col justify-between relative border-r border-dashed border-slate-800">
@@ -137,14 +137,14 @@ export default function BoardingPassPage() {
             {/* Header info */}
             <div className="flex justify-between items-start">
               <div>
-                <span className="text-[10px] font-bold text-sky-400 uppercase tracking-widest">
+                <span className="text-[10px] font-bold text-orange-400 uppercase tracking-widest">
                   Official Boarding Pass
                 </span>
                 <h2 className="text-sm font-extrabold text-white uppercase tracking-wider mt-0.5">
                   PTPN FINANCE & RISK LEADERS FORUM 2026
                 </h2>
               </div>
-              <Plane className="w-5 h-5 text-sky-400 rotate-45" />
+              <Plane className="w-5 h-5 text-orange-400 rotate-45" />
             </div>
 
             {/* Middle passenger info */}
@@ -155,7 +155,7 @@ export default function BoardingPassPage() {
               </div>
               <div>
                 <span className="block text-[9px] uppercase tracking-wider text-slate-500">KATEGORI KELAS</span>
-                <span className="text-sm font-extrabold text-sky-400 uppercase tracking-wide">
+                <span className="text-sm font-extrabold text-orange-400 uppercase tracking-wide">
                   {participant.kategori}
                 </span>
               </div>
@@ -166,7 +166,7 @@ export default function BoardingPassPage() {
               <div className="flex gap-4">
                 <div>
                   <span className="block text-[9px] uppercase tracking-wider text-slate-500">TANGGAL</span>
-                  <span className="text-xs font-semibold text-slate-300">01 Juni 2026</span>
+                  <span className="text-xs font-semibold text-slate-300">11-12 Juni 2026</span>
                 </div>
                 <div>
                   <span className="block text-[9px] uppercase tracking-wider text-slate-500">SEAT</span>
@@ -180,11 +180,11 @@ export default function BoardingPassPage() {
               <div className="flex items-center gap-4 text-[10px] text-slate-400">
                 <div className="flex items-center gap-1">
                   <Calendar className="w-3 h-3 text-slate-500" />
-                  <span>19:00 WIB</span>
+                  <span>08:00 - 17:00 WIB</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <MapPin className="w-3 h-3 text-slate-500" />
-                  <span>Main Ballroom</span>
+                  <span>PT. LPP Agro Nusantara</span>
                 </div>
               </div>
 
@@ -221,8 +221,8 @@ export default function BoardingPassPage() {
 
             {/* Stub header */}
             <div className="flex justify-between items-center">
-              <span className="text-[9px] font-bold text-indigo-400 uppercase tracking-widest">DETACHABLE STUB</span>
-              <span className="text-[10px] font-extrabold text-white bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20">
+              <span className="text-[9px] font-bold text-orange-400 uppercase tracking-widest">DETACHABLE STUB</span>
+              <span className="text-[10px] font-extrabold text-white bg-orange-500/10 px-2 py-0.5 rounded border border-orange-500/20">
                 {selectedSeatId}
               </span>
             </div>
