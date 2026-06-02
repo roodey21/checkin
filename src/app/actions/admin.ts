@@ -240,35 +240,89 @@ export async function getParticipantsListAction() {
 
     const supabase = getSupabaseAdmin();
 
-    // Query participants and join bookings
-    const { data, error } = await supabase
+    // Query participants
+    const { data: participants, error: participantsError } = await supabase
       .from('participants')
-      .select(`
-        *,
-        bookings (
-          seat_id
-        )
-      `)
+      .select('*')
       .order('nama', { ascending: true });
 
-    if (error) throw error;
+    if (participantsError) throw participantsError;
+
+    // Query bookings separately to avoid relation cardinality ambiguity
+    const { data: bookings, error: bookingsError } = await supabase
+      .from('bookings')
+      .select('participant_id, seat_id');
+
+    if (bookingsError) throw bookingsError;
+
+    const bookingByParticipantId = new Map<string, string>();
+    for (const b of bookings || []) {
+      if (b.participant_id && b.seat_id) {
+        bookingByParticipantId.set(b.participant_id, b.seat_id);
+      }
+    }
 
     // Format output
-    const formatted = data.map((p: any) => ({
+    const formatted = (participants || []).map((p: any) => {
+      const seatId = bookingByParticipantId.get(p.id) || null;
+
+      return {
       id: p.id,
       nama: p.nama,
       email: p.email,
       no_wa: p.no_wa,
       kategori: p.kategori,
       booking_code: p.booking_code,
-      checkedIn: p.bookings && p.bookings.length > 0,
-      seatId: p.bookings && p.bookings.length > 0 ? p.bookings[0].seat_id : null,
-    }));
+      checkedIn: !!seatId,
+      seatId,
+    };
+    });
 
     return { success: true, participants: formatted };
   } catch (error: any) {
     console.error('getParticipantsListAction error:', error);
     return { success: false, error: error.message || 'Gagal mengambil data peserta.' };
+  }
+}
+
+// Fetch one participant boarding-pass data for admin printing
+export async function getAdminBoardingPassDataAction(participantId: string) {
+  try {
+    const isAdmin = await checkAdminSessionAction();
+    if (!isAdmin) return { success: false, error: 'Unauthorized.' };
+
+    const supabase = getSupabaseAdmin();
+
+    const { data: participant, error: participantError } = await supabase
+      .from('participants')
+      .select('id, nama, email, kategori, booking_code')
+      .eq('id', participantId)
+      .maybeSingle();
+
+    if (participantError) throw participantError;
+    if (!participant) {
+      return { success: false, error: 'Peserta tidak ditemukan.' };
+    }
+
+    const { data: booking, error: bookingError } = await supabase
+      .from('bookings')
+      .select('seat_id')
+      .eq('participant_id', participantId)
+      .maybeSingle();
+
+    if (bookingError) throw bookingError;
+    if (!booking?.seat_id) {
+      return { success: false, error: 'Peserta belum check-in atau belum memiliki kursi.' };
+    }
+
+    return {
+      success: true,
+      participant,
+      seatId: booking.seat_id,
+    };
+  } catch (error: any) {
+    console.error('getAdminBoardingPassDataAction error:', error);
+    return { success: false, error: error.message || 'Gagal mengambil data boarding pass.' };
   }
 }
 

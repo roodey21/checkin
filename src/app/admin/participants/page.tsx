@@ -23,7 +23,8 @@ import {
   Loader2,
   AlertCircle,
   FileSpreadsheet,
-  Check
+  Check,
+  Printer
 } from 'lucide-react';
 
 interface ParticipantDisplay {
@@ -396,12 +397,13 @@ export default function AdminDashboardPage() {
                 <th className="py-4 px-6">Kelas</th>
                 <th className="py-4 px-6 text-center">Kode Booking</th>
                 <th className="py-4 px-6 text-center">Status Seat</th>
+                <th className="py-4 px-6 text-center">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200 text-slate-700">
               {filteredParticipants.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-12 px-6 text-center text-slate-500 text-sm">
+                  <td colSpan={7} className="py-12 px-6 text-center text-slate-500 text-sm">
                     Tidak ada data peserta ditemukan.
                   </td>
                 </tr>
@@ -441,6 +443,19 @@ export default function AdminDashboardPage() {
                         <span className="px-2.5 py-1 rounded-md bg-slate-100 border border-slate-200 text-slate-500 text-xs italic">
                           Belum Check-in
                         </span>
+                      )}
+                    </td>
+                    <td className="py-4 px-6 text-center">
+                      {p.checkedIn && p.seatId ? (
+                        <Link
+                          href={`/admin/participants/${p.id}/boarding-pass`}
+                          className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-700 hover:text-sky-600 hover:border-sky-300 hover:bg-sky-50 transition-all shadow-sm text-xs font-semibold"
+                        >
+                          <Printer className="w-3.5 h-3.5" />
+                          <span>Cetak Ticket</span>
+                        </Link>
+                      ) : (
+                        <span className="text-xs text-slate-400">-</span>
                       )}
                     </td>
                   </tr>
