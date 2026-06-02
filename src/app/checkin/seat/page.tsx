@@ -211,7 +211,7 @@ export default function SeatSelectionPage() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-3">
         <Clock className="w-8 h-8 text-sky-400 animate-spin" />
-        <span className="text-slate-400 text-sm">Menyiapkan seat map...</span>
+        <span className="text-slate-600 text-sm">Menyiapkan seat map...</span>
       </div>
     );
   }
@@ -235,14 +235,14 @@ export default function SeatSelectionPage() {
   return (
     <div className="min-h-screen py-8 px-4 flex flex-col items-center justify-start max-w-6xl mx-auto">
       {/* Header */}
-      <div className="w-full flex flex-col md:flex-row justify-between items-center mb-8 gap-4 pb-6 border-b border-slate-800">
+      <div className="w-full flex flex-col md:flex-row justify-between items-center mb-8 gap-4 pb-6 border-b border-slate-200">
         <div className="flex items-center gap-3">
           <div className="p-2.5 bg-orange-500/10 rounded-xl border border-orange-500/20">
             <Plane className="w-6 h-6 text-orange-400 rotate-45" />
           </div>
           <div>
-            <h1 className="text-lg font-bold text-white leading-tight">Pilih Tempat Duduk</h1>
-            <p className="text-xs text-slate-400">Selamat datang, <span className="text-orange-400 font-semibold">{participant.nama}</span> ({participant.kategori.toUpperCase()})</p>
+            <h1 className="text-lg font-bold text-slate-900 leading-tight">Pilih Tempat Duduk</h1>
+            <p className="text-xs text-slate-600">Selamat datang, <span className="text-orange-500 font-semibold">{participant.nama}</span> ({participant.kategori.toUpperCase()})</p>
           </div>
         </div>
 
@@ -260,7 +260,7 @@ export default function SeatSelectionPage() {
               if (selectedSeatId) unlockSeatAction(participant.id);
               logout();
             }}
-            className="flex items-center gap-2 px-3 py-2 bg-slate-900 border border-slate-800 text-slate-400 hover:text-red-400 hover:border-red-500/30 rounded-xl text-sm transition-all"
+            className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 text-slate-600 hover:text-red-500 hover:border-red-500/30 rounded-xl text-sm transition-all shadow-sm"
           >
             <LogOut className="w-4 h-4" />
             <span>Keluar</span>
@@ -272,17 +272,17 @@ export default function SeatSelectionPage() {
         <div className="w-full flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/25 rounded-2xl text-sm text-red-200 mb-6 max-w-4xl">
           <ShieldAlert className="w-5 h-5 text-red-400 shrink-0" />
           <p className="flex-1">{error}</p>
-          <button onClick={() => setError(null)} className="text-xs text-slate-400 hover:text-white font-bold">Tutup</button>
+          <button onClick={() => setError(null)} className="text-xs text-slate-500 hover:text-slate-900 font-bold">Tutup</button>
         </div>
       )}
 
       {/* Main Seat Map Layout */}
       <div className="w-full flex flex-col lg:flex-row gap-8 items-start justify-center">
         {/* Left Column: Seating Chart */}
-        <div className="flex-1 w-full glass-card p-6 rounded-3xl border border-slate-800 shadow-xl flex flex-col items-center">
+        <div className="flex-1 w-full glass-card p-6 rounded-3xl border border-slate-200 shadow-xl flex flex-col items-center">
           {/* Stage representation */}
-          <div className="w-full max-w-md bg-slate-900 border-2 border-slate-700 text-center py-4 rounded-xl mb-12 shadow-inner relative">
-            <span className="text-xs font-bold text-slate-400 tracking-[0.3em] uppercase">STAGE / LAYAR UTAMA</span>
+          <div className="w-full max-w-md bg-slate-100 border-2 border-slate-200 text-center py-4 rounded-xl mb-12 shadow-inner relative">
+            <span className="text-xs font-bold text-slate-500 tracking-[0.3em] uppercase">STAGE / LAYAR UTAMA</span>
             <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-32 h-1 bg-sky-500 blur-[2px]"></div>
           </div>
 
@@ -310,11 +310,11 @@ export default function SeatSelectionPage() {
                               disabled={status === 'booked' || (status === 'locked' && selectedSeatId !== seat.id) || !isEligible || actionLoading}
                               className={`
                                 w-11 h-11 rounded-lg text-xs font-bold flex flex-col items-center justify-center transition-all border relative
-                                ${status === 'available' && isEligible && 'bg-slate-900/60 border-slate-700 text-sky-400 hover:border-sky-400 hover:bg-sky-500/10 hover:shadow-[0_0_12px_rgba(56,189,248,0.2)]'}
+                                ${status === 'available' && isEligible && 'bg-white border-slate-300 text-sky-600 hover:border-sky-400 hover:bg-sky-50 hover:shadow-[0_0_12px_rgba(56,189,248,0.12)]'}
                                 ${status === 'selected' && 'bg-indigo-600 border-indigo-400 text-white animate-pulse-ring ring-2 ring-indigo-500/40'}
                                 ${status === 'locked' && 'bg-yellow-500/10 border-yellow-500/30 text-yellow-500 cursor-not-allowed'}
                                 ${status === 'booked' && 'bg-red-500/15 border-red-500/30 text-red-500 cursor-not-allowed'}
-                                {!isEligible && 'opacity-20 border-slate-800 text-slate-600 cursor-not-allowed bg-slate-950'}
+                                {!isEligible && 'opacity-20 border-slate-200 text-slate-400 cursor-not-allowed bg-slate-100'}
                               `}
                               title={`${seat.id} - ${seat.kategori.toUpperCase()}`}
                             >
@@ -334,7 +334,7 @@ export default function SeatSelectionPage() {
             </div>
 
             {/* Divider */}
-            <div className="h-px bg-slate-800 my-6"></div>
+            <div className="h-px bg-slate-200 my-6"></div>
 
             {/* 2. Business Section */}
             <div className="space-y-3 min-w-[320px]">
@@ -365,11 +365,11 @@ export default function SeatSelectionPage() {
                                 disabled={status === 'booked' || (status === 'locked' && selectedSeatId !== seat.id) || !isEligible || actionLoading}
                                 className={`
                                   w-10 h-10 rounded-lg text-xs font-bold flex flex-col items-center justify-center transition-all border relative
-                                  ${status === 'available' && isEligible && 'bg-slate-900/60 border-slate-700 text-indigo-400 hover:border-indigo-400 hover:bg-indigo-500/10 hover:shadow-[0_0_12px_rgba(99,102,241,0.2)]'}
+                                  ${status === 'available' && isEligible && 'bg-white border-slate-300 text-indigo-600 hover:border-indigo-400 hover:bg-indigo-50 hover:shadow-[0_0_12px_rgba(99,102,241,0.12)]'}
                                   ${status === 'selected' && 'bg-indigo-600 border-indigo-400 text-white animate-pulse-ring ring-2 ring-indigo-500/40'}
                                   ${status === 'locked' && 'bg-yellow-500/10 border-yellow-500/30 text-yellow-500 cursor-not-allowed'}
                                   ${status === 'booked' && 'bg-red-500/15 border-red-500/30 text-red-500 cursor-not-allowed'}
-                                  {!isEligible && 'opacity-20 border-slate-800 text-slate-600 cursor-not-allowed bg-slate-950'}
+                                  {!isEligible && 'opacity-20 border-slate-200 text-slate-400 cursor-not-allowed bg-slate-100'}
                                 `}
                                 title={`${seat.id} - ${seat.kategori.toUpperCase()}`}
                               >
@@ -395,47 +395,47 @@ export default function SeatSelectionPage() {
         {/* Right Column: Legend & Summary */}
         <div className="w-full lg:w-80 space-y-6">
           {/* Status Legends */}
-          <div className="glass-card p-5 rounded-2xl border border-slate-800">
-            <h3 className="text-sm font-bold text-white mb-4">Legenda Status</h3>
+          <div className="glass-card p-5 rounded-2xl border border-slate-200">
+              <h3 className="text-sm font-bold text-slate-900 mb-4">Legenda Status</h3>
             <div className="grid grid-cols-2 gap-3 text-xs">
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded bg-slate-900 border border-slate-700"></div>
-                <span className="text-slate-300">Tersedia</span>
+                  <div className="w-4 h-4 rounded bg-white border border-slate-300"></div>
+                  <span className="text-slate-600">Tersedia</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 rounded bg-indigo-600 border border-indigo-400"></div>
-                <span className="text-slate-300">Pilihan Anda</span>
+                  <span className="text-slate-600">Pilihan Anda</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 rounded bg-yellow-500/10 border border-yellow-500/30"></div>
-                <span className="text-slate-300">Sedang Dikunci</span>
+                  <span className="text-slate-600">Sedang Dikunci</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 rounded bg-red-500/20 border border-red-500/40"></div>
-                <span className="text-slate-300">Sudah Terisi</span>
+                  <span className="text-slate-600">Sudah Terisi</span>
               </div>
             </div>
           </div>
 
           {/* Confirm panel */}
-          <div className="glass-card p-6 rounded-2xl border border-slate-800 flex flex-col gap-4 relative overflow-hidden">
+            <div className="glass-card p-6 rounded-2xl border border-slate-200 flex flex-col gap-4 relative overflow-hidden">
             {/* Gradient border */}
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-sky-500 to-indigo-600"></div>
 
-            <h3 className="text-sm font-bold text-white">Ringkasan Check-in</h3>
+            <h3 className="text-sm font-bold text-slate-900">Ringkasan Check-in</h3>
             
-            <div className="space-y-3 py-2 border-y border-slate-800 text-sm">
+            <div className="space-y-3 py-2 border-y border-slate-200 text-sm">
               <div className="flex justify-between">
-                <span className="text-slate-400">Nama</span>
-                <span className="font-semibold text-white">{participant.nama}</span>
+                <span className="text-slate-500">Nama</span>
+                <span className="font-semibold text-slate-900">{participant.nama}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400">Kategori Kelas</span>
+                <span className="text-slate-500">Kategori Kelas</span>
                 <span className="font-semibold text-sky-400 uppercase">{participant.kategori}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400">Kursi Dipilih</span>
-                <span className="font-bold text-white bg-indigo-500/20 px-2 py-0.5 rounded border border-indigo-500/30">
+                <span className="text-slate-500">Kursi Dipilih</span>
+                <span className="font-bold text-slate-900 bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20">
                   {selectedSeatId || 'Belum memilih'}
                 </span>
               </div>
@@ -450,7 +450,7 @@ export default function SeatSelectionPage() {
                 {actionLoading ? 'Menyimpan...' : 'Konfirmasi Check-in'}
               </button>
             ) : (
-              <div className="flex items-center gap-2 p-3 bg-slate-900 border border-slate-800 rounded-xl text-slate-400 text-xs">
+              <div className="flex items-center gap-2 p-3 bg-slate-100 border border-slate-200 rounded-xl text-slate-600 text-xs">
                 <AlertTriangle className="w-4 h-4 text-sky-400 shrink-0" />
                 <span>Pilihlah salah satu kursi yang tersedia sesuai kelas Anda untuk mengonfirmasi check-in.</span>
               </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
   checkAdminSessionAction,
@@ -213,7 +214,7 @@ export default function AdminDashboardPage() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-3">
         <Loader2 className="w-8 h-8 text-purple-400 animate-spin" />
-        <span className="text-slate-400 text-sm">Memuat dashboard admin...</span>
+        <span className="text-slate-600 text-sm">Memuat dashboard admin...</span>
       </div>
     );
   }
@@ -221,22 +222,37 @@ export default function AdminDashboardPage() {
   return (
     <div className="min-h-screen p-6 max-w-7xl mx-auto flex flex-col gap-8">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center pb-6 border-b border-slate-800 gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center pb-6 border-b border-slate-200 gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></span>
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Portal Admin</span>
+            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Portal Admin</span>
           </div>
-          <h1 className="text-2xl font-extrabold text-white">Kelola Peserta & Kursi</h1>
+          <h1 className="text-2xl font-extrabold text-slate-900">Kelola Peserta & Kursi</h1>
         </div>
 
         <button
           onClick={handleLogout}
-          className="flex items-center gap-2 px-4 py-2.5 bg-slate-900 border border-slate-800 hover:border-red-500/20 hover:text-red-400 text-slate-400 font-semibold rounded-xl text-sm transition-all"
+          className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:border-red-500/20 hover:text-red-500 text-slate-600 font-semibold rounded-xl text-sm transition-all shadow-sm"
         >
           <LogOut className="w-4.5 h-4.5" />
           <span>Keluar Portal</span>
         </button>
+      </div>
+
+      <div className="flex flex-wrap gap-3">
+        <Link
+          href="/admin/participants"
+          className="px-4 py-2 rounded-xl border border-slate-200 bg-slate-900 text-white text-sm font-semibold shadow-sm"
+        >
+          Daftar Peserta
+        </Link>
+        <Link
+          href="/admin/seats"
+          className="px-4 py-2 rounded-xl border border-slate-200 bg-white text-slate-700 text-sm font-semibold shadow-sm hover:bg-slate-50 hover:border-slate-300 transition-all"
+        >
+          Kelola Kursi
+        </Link>
       </div>
 
       {/* Message Notifications */}
@@ -258,19 +274,19 @@ export default function AdminDashboardPage() {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="glass-card p-6 rounded-2xl border border-slate-800 flex items-center justify-between shadow">
+        <div className="glass-card p-6 rounded-2xl border border-slate-200 flex items-center justify-between shadow">
           <div className="space-y-1">
-            <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">Total Peserta</span>
-            <p className="text-3xl font-black text-white">{totalCount}</p>
+            <span className="text-xs text-slate-500 font-bold uppercase tracking-wider">Total Peserta</span>
+            <p className="text-3xl font-black text-slate-900">{totalCount}</p>
           </div>
           <div className="w-12 h-12 bg-sky-500/10 rounded-xl flex items-center justify-center border border-sky-500/25">
             <Users className="w-6 h-6 text-sky-400" />
           </div>
         </div>
 
-        <div className="glass-card p-6 rounded-2xl border border-slate-800 flex items-center justify-between shadow">
+        <div className="glass-card p-6 rounded-2xl border border-slate-200 flex items-center justify-between shadow">
           <div className="space-y-1">
-            <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">Sudah Check-in</span>
+            <span className="text-xs text-slate-500 font-bold uppercase tracking-wider">Sudah Check-in</span>
             <p className="text-3xl font-black text-emerald-400">{checkedInCount}</p>
           </div>
           <div className="w-12 h-12 bg-emerald-500/10 rounded-xl flex items-center justify-center border border-emerald-500/25">
@@ -278,9 +294,9 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
-        <div className="glass-card p-6 rounded-2xl border border-slate-800 flex items-center justify-between shadow">
+        <div className="glass-card p-6 rounded-2xl border border-slate-200 flex items-center justify-between shadow">
           <div className="space-y-1">
-            <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">Belum Check-in</span>
+            <span className="text-xs text-slate-500 font-bold uppercase tracking-wider">Belum Check-in</span>
             <p className="text-3xl font-black text-yellow-400">{pendingCheckIn}</p>
           </div>
           <div className="w-12 h-12 bg-yellow-500/10 rounded-xl flex items-center justify-center border border-yellow-500/25">
@@ -290,7 +306,7 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Action Controls Panel */}
-      <div className="glass-card p-6 rounded-3xl border border-slate-800 shadow-xl flex flex-col md:flex-row justify-between items-center gap-6">
+      <div className="glass-card p-6 rounded-3xl border border-slate-200 shadow-xl flex flex-col md:flex-row justify-between items-center gap-6">
         <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
           {/* CSV File Input */}
           <input
@@ -303,7 +319,7 @@ export default function AdminDashboardPage() {
           <button
             onClick={() => fileInputRef.current?.click()}
             disabled={actionLoading !== null}
-            className="flex items-center justify-center gap-2 px-5 py-3 bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-white font-semibold rounded-xl text-sm transition-all shadow"
+            className="flex items-center justify-center gap-2 px-5 py-3 bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 text-slate-700 font-semibold rounded-xl text-sm transition-all shadow-sm"
           >
             {actionLoading === 'upload' ? (
               <Loader2 className="w-4.5 h-4.5 animate-spin text-purple-400" />
@@ -317,7 +333,7 @@ export default function AdminDashboardPage() {
           <button
             onClick={handleGenerateCodes}
             disabled={actionLoading !== null || totalCount === 0}
-            className="flex items-center justify-center gap-2 px-5 py-3 bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-white font-semibold rounded-xl text-sm transition-all shadow"
+            className="flex items-center justify-center gap-2 px-5 py-3 bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 text-slate-700 font-semibold rounded-xl text-sm transition-all shadow-sm"
           >
             {actionLoading === 'generate' ? (
               <Loader2 className="w-4.5 h-4.5 animate-spin text-sky-400" />
@@ -343,36 +359,36 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* CSV Format Note */}
-        <div className="flex items-center gap-3 p-3.5 bg-slate-950 rounded-2xl border border-slate-900/60 max-w-sm">
+        <div className="flex items-center gap-3 p-3.5 bg-slate-100 rounded-2xl border border-slate-200 max-w-sm">
           <FileSpreadsheet className="w-8 h-8 text-slate-500 shrink-0" />
-          <div className="text-[10px] text-slate-400 leading-normal">
-            <span className="font-bold text-white block mb-0.5">Format CSV Google Form:</span>
+          <div className="text-[10px] text-slate-500 leading-normal">
+            <span className="font-bold text-slate-900 block mb-0.5">Format CSV Google Form:</span>
             nama,email,no_wa,kategori
           </div>
         </div>
       </div>
 
       {/* Participant List & Table */}
-      <div className="glass-card rounded-3xl border border-slate-800 shadow-xl overflow-hidden flex flex-col">
+      <div className="glass-card rounded-3xl border border-slate-200 shadow-xl overflow-hidden flex flex-col">
         {/* Search Header */}
-        <div className="p-5 border-b border-slate-800 flex justify-between items-center gap-4 flex-col sm:flex-row">
-          <h3 className="text-sm font-bold text-white uppercase tracking-wider shrink-0">Daftar Peserta</h3>
+        <div className="p-5 border-b border-slate-200 flex justify-between items-center gap-4 flex-col sm:flex-row">
+          <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider shrink-0">Daftar Peserta</h3>
           <div className="relative w-full max-w-md">
             <input
               type="text"
               placeholder="Cari nama, email atau kode booking..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-slate-900/60 border border-slate-800 rounded-xl text-slate-300 placeholder-slate-600 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 text-sm transition-all"
+              className="w-full pl-10 pr-4 py-2.5 bg-white/85 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 text-sm transition-all shadow-sm"
             />
-            <Search className="w-4 h-4 text-slate-600 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           </div>
         </div>
 
         {/* Table View */}
         <div className="overflow-x-auto">
           <table className="w-full border-collapse text-left text-sm">
-            <thead className="bg-slate-900/60 border-b border-slate-800 text-slate-400 text-xs font-bold uppercase tracking-wider">
+            <thead className="bg-slate-100/80 border-b border-slate-200 text-slate-600 text-xs font-bold uppercase tracking-wider">
               <tr>
                 <th className="py-4 px-6">Nama</th>
                 <th className="py-4 px-6">Email</th>
@@ -382,7 +398,7 @@ export default function AdminDashboardPage() {
                 <th className="py-4 px-6 text-center">Status Seat</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-900 text-slate-300">
+            <tbody className="divide-y divide-slate-200 text-slate-700">
               {filteredParticipants.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="py-12 px-6 text-center text-slate-500 text-sm">
@@ -391,10 +407,10 @@ export default function AdminDashboardPage() {
                 </tr>
               ) : (
                 filteredParticipants.map((p) => (
-                  <tr key={p.id} className="hover:bg-slate-900/30 transition-colors">
-                    <td className="py-4 px-6 font-bold text-white">{p.nama}</td>
-                    <td className="py-4 px-6 text-slate-400">{p.email}</td>
-                    <td className="py-4 px-6 text-slate-400 font-mono">{p.no_wa || '-'}</td>
+                  <tr key={p.id} className="hover:bg-slate-50 transition-colors">
+                    <td className="py-4 px-6 font-bold text-slate-900">{p.nama}</td>
+                    <td className="py-4 px-6 text-slate-600">{p.email}</td>
+                    <td className="py-4 px-6 text-slate-600 font-mono">{p.no_wa || '-'}</td>
                     <td className="py-4 px-6">
                       <span
                         className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border
@@ -406,7 +422,7 @@ export default function AdminDashboardPage() {
                     </td>
                     <td className="py-4 px-6 text-center">
                       {p.booking_code ? (
-                        <span className="font-mono bg-slate-950 px-2.5 py-1 rounded border border-slate-900 text-slate-200 tracking-wider text-xs">
+                        <span className="font-mono bg-slate-100 px-2.5 py-1 rounded border border-slate-200 text-slate-800 tracking-wider text-xs">
                           {p.booking_code}
                         </span>
                       ) : (
@@ -422,7 +438,7 @@ export default function AdminDashboardPage() {
                           </span>
                         </span>
                       ) : (
-                        <span className="px-2.5 py-1 rounded-md bg-slate-950 border border-slate-900 text-slate-500 text-xs italic">
+                        <span className="px-2.5 py-1 rounded-md bg-slate-100 border border-slate-200 text-slate-500 text-xs italic">
                           Belum Check-in
                         </span>
                       )}

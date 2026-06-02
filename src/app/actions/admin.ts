@@ -271,3 +271,117 @@ export async function getParticipantsListAction() {
     return { success: false, error: error.message || 'Gagal mengambil data peserta.' };
   }
 }
+
+// Fetch all seats for admin management
+export async function getSeatsListAction() {
+  try {
+    const isAdmin = await checkAdminSessionAction();
+    if (!isAdmin) return { success: false, error: 'Unauthorized.' };
+
+    const supabase = getSupabaseAdmin();
+
+    const { data, error } = await supabase
+      .from('seats')
+      .select('*')
+      .order('kategori', { ascending: true })
+      .order('row_name', { ascending: true })
+      .order('seat_number', { ascending: true });
+
+    if (error) throw error;
+
+    return { success: true, seats: data };
+  } catch (error: any) {
+    console.error('getSeatsListAction error:', error);
+    return { success: false, error: error.message || 'Gagal mengambil daftar kursi.' };
+  }
+}
+
+// Create a new seat entry
+export async function createSeatAction(input: {
+  kategori: 'eksekutif' | 'bisnis';
+  row_name: string;
+  seat_number: number;
+}) {
+  try {
+    const isAdmin = await checkAdminSessionAction();
+    if (!isAdmin) return { success: false, error: 'Unauthorized.' };
+
+    const kategori = input.kategori?.trim().toLowerCase();
+    const rowName = input.row_name?.trim().toUpperCase();
+    const seatNumber = Number(input.seat_number);
+
+    if (!rowName || !Number.isInteger(seatNumber) || seatNumber <= 0) {
+      return { success: false, error: 'Data kursi belum lengkap atau tidak valid.' };
+    }
+
+    const normalizedKategori = kategori === 'eksekutif' ? 'eksekutif' : 'bisnis';
+    const seatId = `${rowName}-${seatNumber}`;
+    const supabase = getSupabaseAdmin();
+
+    const { data: existingSeat, error: lookupError } = await supabase
+      .from('seats')
+      .select('id')
+      .eq('id', seatId)
+      .maybeSingle();
+
+    if (lookupError) throw lookupError;
+    if (existingSeat) {
+      return { success: false, error: 'Kode kursi sudah ada. Gunakan baris/nomor yang berbeda.' };
+    }
+
+    const { error } = await supabase.from('seats').insert({
+      id: seatId,
+      kategori: normalizedKategori,
+      row_name: rowName,
+      seat_number: seatNumber,
+    });
+
+    if (error) throw error;
+
+    return { success: true };
+  } catch (error: any) {
+    console.error('createSeatAction error:', error);
+    return { success: false, error: error.message || 'Gagal menambah kursi.' };
+  }
+}
+
+// Delete a seat entry if it is not in use
+export async function deleteSeatAction(seatId: string) {
+  try {
+    const isAdmin = await checkAdminSessionAction();
+    if (!isAdmin) return { success: false, error: 'Unauthorized.' };
+
+    const supabase = getSupabaseAdmin();
+
+    const { data: booking, error: bookingError } = await supabase
+      .from('bookings')
+      .select('seat_id')
+      .eq('seat_id', seatId)
+      .maybeSingle();
+
+    if (bookingError) throw bookingError;
+    if (booking) {
+      return { success: false, error: 'Kursi ini sudah dipakai dan tidak bisa dihapus.' };
+    }
+
+    const { data: lockedSeat, error: lockError } = await supabase
+      .from('active_seat_locks')
+      .select('seat_id')
+      .eq('seat_id', seatId)
+      .maybeSingle();
+
+    if (lockError) throw lockError;
+    if (lockedSeat) {
+      return { success: false, error: 'Kursi ini sedang dikunci dan tidak bisa dihapus.' };
+    }
+
+    const { error } = await supabase.from('seats').delete().eq('id', seatId);
+
+    if (error) throw error;
+
+    return { success: true };
+  } catch (error: any) {
+    console.error('deleteSeatAction error:', error);
+    return { success: false, error: error.message || 'Gagal menghapus kursi.' };
+  }
+}

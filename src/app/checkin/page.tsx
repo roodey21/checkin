@@ -55,7 +55,7 @@ function CheckInFormContent() {
   };
 
   return (
-    <div className="w-full max-w-md p-8 glass-card rounded-2xl border border-slate-800 shadow-2xl relative overflow-hidden">
+    <div className="w-full max-w-md p-8 glass-card rounded-2xl border border-slate-200 shadow-2xl relative overflow-hidden">
       {/* Background glow */}
       <div className="absolute -top-10 -right-10 w-40 h-40 bg-orange-500/10 rounded-full blur-3xl pointer-events-none"></div>
       <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
@@ -67,10 +67,10 @@ function CheckInFormContent() {
         <span className="text-xs font-bold text-orange-400 uppercase tracking-widest mb-1">
           Web Check-In Portal
         </span>
-        <h1 className="text-xl font-extrabold text-white text-center leading-tight">
+        <h1 className="text-xl font-extrabold text-slate-900 text-center leading-tight">
           Masukkan Kode Booking
         </h1>
-        <p className="text-xs text-slate-400 text-center mt-2">
+        <p className="text-xs text-slate-600 text-center mt-2">
           Gunakan kode booking unik Anda yang dikirimkan via email untuk memilih tempat duduk.
         </p>
       </div>
@@ -83,7 +83,7 @@ function CheckInFormContent() {
         className="space-y-6"
       >
         <div className="space-y-2">
-          <label htmlFor="booking-code" className="text-xs font-bold uppercase tracking-wider text-slate-300">
+          <label htmlFor="booking-code" className="text-xs font-bold uppercase tracking-wider text-slate-700">
             Kode Booking
           </label>
           <input
@@ -93,7 +93,7 @@ function CheckInFormContent() {
             value={code}
             onChange={(e) => setCode(e.target.value.toUpperCase())}
             disabled={loading}
-            className="w-full px-4 py-3 bg-slate-900/60 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all font-mono text-center text-lg tracking-widest"
+            className="w-full px-4 py-3 bg-white/85 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all font-mono text-center text-lg tracking-widest shadow-sm"
           />
         </div>
 
@@ -132,26 +132,26 @@ export default function CheckInPage() {
       {/* Logos Header */}
       <div className="w-full max-w-md flex justify-between items-center px-4 mb-6">
         <div className="flex flex-col">
-          <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider leading-none">Danantara</span>
-          <span className="text-[9px] font-extrabold text-white uppercase tracking-widest leading-none mt-1">Indonesia</span>
+          <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider leading-none">Danantara</span>
+          <span className="text-[9px] font-extrabold text-slate-900 uppercase tracking-widest leading-none mt-1">Indonesia</span>
         </div>
         <div className="flex flex-col text-right">
           <span className="text-[9px] font-bold text-emerald-400 uppercase tracking-wider leading-none">Perkebunan</span>
-          <span className="text-[9px] font-extrabold text-slate-300 uppercase tracking-widest leading-none mt-1">Nusantara</span>
+          <span className="text-[9px] font-extrabold text-slate-700 uppercase tracking-widest leading-none mt-1">Nusantara</span>
         </div>
       </div>
 
       <div className="text-center mb-8 max-w-md flex flex-col items-center">
-        <h2 className="text-lg font-black tracking-[0.25em] text-white">PTPN</h2>
+        <h2 className="text-lg font-black tracking-[0.25em] text-slate-900">PTPN</h2>
         <h1 className="text-2xl font-extrabold text-sunset tracking-wider mt-1 uppercase leading-tight">
           Finance & Risk Leaders Forum 2026
         </h1>
-        <div className="mt-3 inline-block bg-slate-950/60 border border-orange-500/30 rounded-full px-4 py-1 text-[9px] text-white uppercase font-bold tracking-wider">
+        <div className="mt-3 inline-block bg-white/80 border border-orange-500/25 rounded-full px-4 py-1 text-[9px] text-slate-800 uppercase font-bold tracking-wider shadow-sm">
           Navigating The New Era of Financial Excellence
         </div>
-        <div className="mt-4 flex flex-wrap justify-center gap-2 text-[9px] text-slate-400">
-          <span className="bg-slate-900/50 border border-slate-800 px-2.5 py-1 rounded-full">📅 11-12 Juni 2026</span>
-          <span className="bg-slate-900/50 border border-slate-800 px-2.5 py-1 rounded-full">📍 PT. LPP Agro Nusantara</span>
+        <div className="mt-4 flex flex-wrap justify-center gap-2 text-[9px] text-slate-500">
+          <span className="bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-full">📅 11-12 Juni 2026</span>
+          <span className="bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-full">📍 PT. LPP Agro Nusantara</span>
         </div>
       </div>
 

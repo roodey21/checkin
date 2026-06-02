@@ -21,7 +21,7 @@ export default function BoardingPassPage() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-3">
         <RefreshCw className="w-8 h-8 text-sky-400 animate-spin" />
-        <span className="text-slate-400 text-sm">Menyiapkan boarding pass...</span>
+        <span className="text-slate-600 text-sm">Menyiapkan boarding pass...</span>
       </div>
     );
   }
@@ -41,7 +41,7 @@ export default function BoardingPassPage() {
       const canvas = await html2canvas(element, {
         scale: 3, // Super high quality
         useCORS: true,
-        backgroundColor: '#030712' // Dark slate background
+        backgroundColor: '#f8fafc'
       });
       const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
       const link = document.createElement('a');
@@ -71,7 +71,7 @@ export default function BoardingPassPage() {
       const canvas = await html2canvas(element, {
         scale: 3,
         useCORS: true,
-        backgroundColor: '#030712'
+        backgroundColor: '#f8fafc'
       });
       const imgData = canvas.toDataURL('image/jpeg', 0.95);
       
@@ -101,7 +101,7 @@ export default function BoardingPassPage() {
       <div className="w-full flex justify-between items-center mb-10 no-print">
         <button
           onClick={() => router.push('/checkin/seat')}
-          className="flex items-center gap-2 text-sm text-slate-400 hover:text-white transition-colors"
+          className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Ubah Kursi</span>
@@ -112,7 +112,7 @@ export default function BoardingPassPage() {
             logout();
             router.push('/checkin');
           }}
-          className="text-sm text-slate-400 hover:text-red-400 transition-colors"
+          className="text-sm text-slate-600 hover:text-red-500 transition-colors"
         >
           Keluar Sesi
         </button>
@@ -122,17 +122,17 @@ export default function BoardingPassPage() {
       <div className="w-full overflow-x-auto pb-6 flex justify-center print-area">
         <div
           id="boarding-pass-ticket"
-          className="w-[780px] h-[260px] bg-gray-950 rounded-3xl border border-slate-800 shadow-2xl flex overflow-hidden shrink-0 relative"
+          className="w-[780px] h-[260px] bg-white rounded-3xl border border-slate-200 shadow-2xl flex overflow-hidden shrink-0 relative"
           style={{ fontFamily: 'sans-serif' }}
         >
           {/* Accent decoration */}
           <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-orange-500 to-amber-500"></div>
 
           {/* LEFT: MAIN PASSENGER BOARDING CARD (70%) */}
-          <div className="w-[70%] p-6 flex flex-col justify-between relative border-r border-dashed border-slate-800">
+          <div className="w-[70%] p-6 flex flex-col justify-between relative border-r border-dashed border-slate-200">
             {/* Corner cutouts for ticket aesthetic */}
-            <div className="absolute -bottom-3 -right-3 w-6 h-6 bg-slate-950 rounded-full border border-slate-800 no-print"></div>
-            <div className="absolute -top-3 -right-3 w-6 h-6 bg-slate-950 rounded-full border border-slate-800 no-print"></div>
+            <div className="absolute -bottom-3 -right-3 w-6 h-6 bg-slate-50 rounded-full border border-slate-200 no-print"></div>
+            <div className="absolute -top-3 -right-3 w-6 h-6 bg-slate-50 rounded-full border border-slate-200 no-print"></div>
 
             {/* Header info */}
             <div className="flex justify-between items-start">
@@ -140,7 +140,7 @@ export default function BoardingPassPage() {
                 <span className="text-[10px] font-bold text-orange-400 uppercase tracking-widest">
                   Official Boarding Pass
                 </span>
-                <h2 className="text-sm font-extrabold text-white uppercase tracking-wider mt-0.5">
+                <h2 className="text-sm font-extrabold text-slate-900 uppercase tracking-wider mt-0.5">
                   PTPN FINANCE & RISK LEADERS FORUM 2026
                 </h2>
               </div>
@@ -151,7 +151,7 @@ export default function BoardingPassPage() {
             <div className="grid grid-cols-2 gap-y-4 gap-x-2 mt-4">
               <div>
                 <span className="block text-[9px] uppercase tracking-wider text-slate-500">NAMA PESERTA</span>
-                <span className="text-sm font-bold text-white uppercase line-clamp-1">{participant.nama}</span>
+                <span className="text-sm font-bold text-slate-900 uppercase line-clamp-1">{participant.nama}</span>
               </div>
               <div>
                 <span className="block text-[9px] uppercase tracking-wider text-slate-500">KATEGORI KELAS</span>
@@ -161,22 +161,22 @@ export default function BoardingPassPage() {
               </div>
               <div>
                 <span className="block text-[9px] uppercase tracking-wider text-slate-500">KODE BOOKING</span>
-                <span className="text-sm font-bold text-white font-mono tracking-wider">{participant.booking_code}</span>
+                <span className="text-sm font-bold text-slate-900 font-mono tracking-wider">{participant.booking_code}</span>
               </div>
               <div className="flex gap-4">
                 <div>
                   <span className="block text-[9px] uppercase tracking-wider text-slate-500">TANGGAL</span>
-                  <span className="text-xs font-semibold text-slate-300">11-12 Juni 2026</span>
+                  <span className="text-xs font-semibold text-slate-700">11-12 Juni 2026</span>
                 </div>
                 <div>
                   <span className="block text-[9px] uppercase tracking-wider text-slate-500">SEAT</span>
-                  <span className="text-xs font-semibold text-slate-300">{selectedSeatId}</span>
+                  <span className="text-xs font-semibold text-slate-700">{selectedSeatId}</span>
                 </div>
               </div>
             </div>
 
             {/* Footer Barcode / Info */}
-            <div className="flex justify-between items-end mt-4 pt-3 border-t border-slate-900/60">
+            <div className="flex justify-between items-end mt-4 pt-3 border-t border-slate-200">
               <div className="flex items-center gap-4 text-[10px] text-slate-400">
                 <div className="flex items-center gap-1">
                   <Calendar className="w-3 h-3 text-slate-500" />
@@ -214,15 +214,15 @@ export default function BoardingPassPage() {
           </div>
 
           {/* RIGHT: TICKET STUB / DETACHABLE PORTION (30%) */}
-          <div className="w-[30%] p-6 bg-slate-950 flex flex-col justify-between relative bg-gradient-to-br from-slate-900/40 to-slate-950/20">
+          <div className="w-[30%] p-6 bg-slate-100 flex flex-col justify-between relative bg-gradient-to-br from-slate-50 to-slate-100">
             {/* Corner cutouts for ticket aesthetic */}
-            <div className="absolute -bottom-3 -left-3 w-6 h-6 bg-slate-950 rounded-full border border-slate-800 no-print"></div>
-            <div className="absolute -top-3 -left-3 w-6 h-6 bg-slate-950 rounded-full border border-slate-800 no-print"></div>
+            <div className="absolute -bottom-3 -left-3 w-6 h-6 bg-slate-50 rounded-full border border-slate-200 no-print"></div>
+            <div className="absolute -top-3 -left-3 w-6 h-6 bg-slate-50 rounded-full border border-slate-200 no-print"></div>
 
             {/* Stub header */}
             <div className="flex justify-between items-center">
               <span className="text-[9px] font-bold text-orange-400 uppercase tracking-widest">DETACHABLE STUB</span>
-              <span className="text-[10px] font-extrabold text-white bg-orange-500/10 px-2 py-0.5 rounded border border-orange-500/20">
+              <span className="text-[10px] font-extrabold text-slate-900 bg-orange-500/10 px-2 py-0.5 rounded border border-orange-500/20">
                 {selectedSeatId}
               </span>
             </div>
@@ -231,22 +231,22 @@ export default function BoardingPassPage() {
             <div className="space-y-3 mt-4 flex-1 justify-center flex flex-col">
               <div>
                 <span className="block text-[8px] uppercase tracking-wider text-slate-500">NAMA</span>
-                <span className="text-xs font-bold text-white uppercase line-clamp-1">{participant.nama}</span>
+                <span className="text-xs font-bold text-slate-900 uppercase line-clamp-1">{participant.nama}</span>
               </div>
               <div className="grid grid-cols-2 gap-1">
                 <div>
                   <span className="block text-[8px] uppercase tracking-wider text-slate-500">KELAS</span>
-                  <span className="text-[10px] font-semibold text-slate-300 uppercase">{participant.kategori}</span>
+                  <span className="text-[10px] font-semibold text-slate-700 uppercase">{participant.kategori}</span>
                 </div>
                 <div>
                   <span className="block text-[8px] uppercase tracking-wider text-slate-500">KODE</span>
-                  <span className="text-[10px] font-bold text-slate-300 font-mono">{participant.booking_code}</span>
+                  <span className="text-[10px] font-bold text-slate-700 font-mono">{participant.booking_code}</span>
                 </div>
               </div>
             </div>
 
             {/* Stub footer logo */}
-            <div className="text-right border-t border-slate-900/60 pt-3">
+            <div className="text-right border-t border-slate-200 pt-3">
               <span className="text-[8px] font-extrabold text-slate-500 tracking-wider">BOARDING PASS</span>
             </div>
           </div>
@@ -258,7 +258,7 @@ export default function BoardingPassPage() {
         <button
           onClick={handleDownloadJPG}
           disabled={!!downloading}
-          className="flex flex-col items-center justify-center p-4 bg-slate-900/60 hover:bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-2xl text-slate-300 hover:text-white transition-all gap-2 text-xs font-semibold shadow active:scale-[0.98] disabled:opacity-50"
+          className="flex flex-col items-center justify-center p-4 bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 rounded-2xl text-slate-600 hover:text-slate-900 transition-all gap-2 text-xs font-semibold shadow-sm active:scale-[0.98] disabled:opacity-50"
         >
           <Download className="w-5 h-5 text-sky-400" />
           <span>{downloading === 'jpg' ? 'Memproses...' : 'Unduh JPG'}</span>
@@ -267,7 +267,7 @@ export default function BoardingPassPage() {
         <button
           onClick={handleDownloadPDF}
           disabled={!!downloading}
-          className="flex flex-col items-center justify-center p-4 bg-slate-900/60 hover:bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-2xl text-slate-300 hover:text-white transition-all gap-2 text-xs font-semibold shadow active:scale-[0.98] disabled:opacity-50"
+          className="flex flex-col items-center justify-center p-4 bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 rounded-2xl text-slate-600 hover:text-slate-900 transition-all gap-2 text-xs font-semibold shadow-sm active:scale-[0.98] disabled:opacity-50"
         >
           <Download className="w-5 h-5 text-indigo-400" />
           <span>{downloading === 'pdf' ? 'Memproses...' : 'Unduh PDF'}</span>
@@ -276,14 +276,14 @@ export default function BoardingPassPage() {
         <button
           onClick={handlePrint}
           disabled={!!downloading}
-          className="flex flex-col items-center justify-center p-4 bg-slate-900/60 hover:bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-2xl text-slate-300 hover:text-white transition-all gap-2 text-xs font-semibold shadow active:scale-[0.98] disabled:opacity-50"
+          className="flex flex-col items-center justify-center p-4 bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 rounded-2xl text-slate-600 hover:text-slate-900 transition-all gap-2 text-xs font-semibold shadow-sm active:scale-[0.98] disabled:opacity-50"
         >
           <Printer className="w-5 h-5 text-emerald-400" />
           <span>Cetak</span>
         </button>
       </div>
 
-      <p className="text-center text-xs text-slate-500 mt-8 no-print">
+      <p className="text-center text-xs text-slate-600 mt-8 no-print">
         Simpan boarding pass Anda di handphone (JPG) atau cetak (PDF) untuk ditunjukkan saat memasuki area forum.
       </p>
     </div>

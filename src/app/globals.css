@@ -2,14 +2,35 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom globals and variables */
 :root {
-  --foreground-rgb: 248, 250, 252; /* slate-50 */
+  --page-bg-start: 248 250 252;
+  --page-bg-mid: 241 245 249;
+  --page-bg-end: 226 232 240;
+  --page-fg: 15 23 42;
+  --glass-bg: rgba(255, 255, 255, 0.74);
+  --glass-border: rgba(148, 163, 184, 0.28);
+  --glass-shadow: 0 18px 48px rgba(15, 23, 42, 0.08);
+  --scrollbar-track: #e2e8f0;
+  --scrollbar-thumb: #94a3b8;
+  --scrollbar-thumb-hover: #64748b;
+}
+
+html.theme-dark {
+  --page-bg-start: 2 6 23;
+  --page-bg-mid: 15 23 42;
+  --page-bg-end: 15 23 42;
+  --page-fg: 248 250 252;
+  --glass-bg: rgba(15, 23, 42, 0.65);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
+  --scrollbar-track: #020617;
+  --scrollbar-thumb: #1e293b;
+  --scrollbar-thumb-hover: #334155;
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: radial-gradient(ellipse at bottom, rgba(249, 115, 22, 0.15) 0%, rgba(15, 23, 42, 0.4) 60%, rgba(2, 6, 23, 1) 100%);
+  color: rgb(var(--page-fg));
+  background: radial-gradient(ellipse at bottom, rgba(251, 146, 60, 0.12) 0%, rgba(96, 165, 250, 0.08) 58%, rgba(var(--page-bg-end), 1) 100%);
   background-attachment: fixed;
   min-height: 100vh;
 }
@@ -32,11 +53,11 @@ body {
 
 /* Glassmorphism Styles */
 .glass-card {
-  background: rgba(15, 23, 42, 0.65);
+  background: var(--glass-bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
 }
 
 .glass-card-hover {
@@ -44,10 +65,16 @@ body {
 }
 
 .glass-card-hover:hover {
-  background: rgba(15, 23, 42, 0.8);
-  border-color: rgba(56, 189, 248, 0.4); /* sky-400 */
-  box-shadow: 0 10px 40px 0 rgba(56, 189, 248, 0.15);
+  background: rgba(255, 255, 255, 0.92);
+  border-color: rgba(251, 146, 60, 0.28);
+  box-shadow: 0 12px 42px 0 rgba(15, 23, 42, 0.10);
   transform: translateY(-2px);
+}
+
+html.theme-dark .glass-card-hover:hover {
+  background: rgba(15, 23, 42, 0.8);
+  border-color: rgba(56, 189, 248, 0.4);
+  box-shadow: 0 10px 40px 0 rgba(56, 189, 248, 0.15);
 }
 
 /* Custom Scrollbar */
@@ -57,16 +84,16 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #020617;
+  background: var(--scrollbar-track);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
+  background: var(--scrollbar-thumb);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+  background: var(--scrollbar-thumb-hover);
 }
 
 /* Animations */
