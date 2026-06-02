@@ -1,7 +1,14 @@
--- Setup database for Web Check-in System
+-- Setup database for Ballroom Web Check-in System (Round Table Layout)
+
+-- Drop existing tables and views if they exist to allow clean reset
+DROP VIEW IF EXISTS active_seat_locks;
+DROP TABLE IF EXISTS bookings CASCADE;
+DROP TABLE IF EXISTS seat_locks CASCADE;
+DROP TABLE IF EXISTS seats CASCADE;
+DROP TABLE IF EXISTS participants CASCADE;
 
 -- 1. Create participants table
-CREATE TABLE IF NOT EXISTS participants (
+CREATE TABLE participants (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   nama TEXT NOT NULL,
   email TEXT UNIQUE NOT NULL,
@@ -12,16 +19,17 @@ CREATE TABLE IF NOT EXISTS participants (
 );
 
 -- 2. Create seats table
-CREATE TABLE IF NOT EXISTS seats (
-  id TEXT PRIMARY KEY, -- e.g. E1-1, B1-1
+CREATE TABLE seats (
+  id TEXT PRIMARY KEY, -- e.g. E-R1-T1-S1 (Class-Row-Table-Seat)
   kategori TEXT CHECK (kategori IN ('eksekutif', 'bisnis')) NOT NULL,
-  row_name TEXT NOT NULL, -- e.g. E1, B1
+  row_name TEXT NOT NULL, -- e.g. Row 1, Row 2, Row 3
+  table_name TEXT NOT NULL, -- e.g. Meja E1, Meja B1
   seat_number INTEGER NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
 -- 3. Create bookings table
-CREATE TABLE IF NOT EXISTS bookings (
+CREATE TABLE bookings (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   participant_id UUID UNIQUE REFERENCES participants(id) ON DELETE CASCADE,
   seat_id TEXT UNIQUE REFERENCES seats(id) ON DELETE CASCADE,
@@ -29,7 +37,7 @@ CREATE TABLE IF NOT EXISTS bookings (
 );
 
 -- 4. Create seat_locks table
-CREATE TABLE IF NOT EXISTS seat_locks (
+CREATE TABLE seat_locks (
   seat_id TEXT PRIMARY KEY REFERENCES seats(id) ON DELETE CASCADE,
   participant_id UUID UNIQUE REFERENCES participants(id) ON DELETE CASCADE,
   locked_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
@@ -126,11 +134,6 @@ ALTER TABLE seats ENABLE ROW LEVEL SECURITY;
 ALTER TABLE bookings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE seat_locks ENABLE ROW LEVEL SECURITY;
 
--- Drop existing policies if any
-DROP POLICY IF EXISTS "Allow public read access to seats" ON seats;
-DROP POLICY IF EXISTS "Allow public read access to bookings" ON bookings;
-DROP POLICY IF EXISTS "Allow public read access to seat_locks" ON seat_locks;
-
 -- Create public read policies
 CREATE POLICY "Allow public read access to seats" ON seats FOR SELECT USING (true);
 CREATE POLICY "Allow public read access to bookings" ON bookings FOR SELECT USING (true);
@@ -140,27 +143,96 @@ CREATE POLICY "Allow public read access to seat_locks" ON seat_locks FOR SELECT 
 ALTER PUBLICATION supabase_realtime ADD TABLE bookings;
 ALTER PUBLICATION supabase_realtime ADD TABLE seat_locks;
 
--- 10. Seed Seats Data
--- Executive (20 seats)
-INSERT INTO seats (id, kategori, row_name, seat_number) VALUES
-('E1-1', 'eksekutif', 'E1', 1), ('E1-2', 'eksekutif', 'E1', 2), ('E1-3', 'eksekutif', 'E1', 3), ('E1-4', 'eksekutif', 'E1', 4), ('E1-5', 'eksekutif', 'E1', 5),
-('E2-1', 'eksekutif', 'E2', 1), ('E2-2', 'eksekutif', 'E2', 2), ('E2-3', 'eksekutif', 'E2', 3), ('E2-4', 'eksekutif', 'E2', 4), ('E2-5', 'eksekutif', 'E2', 5),
-('E3-1', 'eksekutif', 'E3', 1), ('E3-2', 'eksekutif', 'E3', 2), ('E3-3', 'eksekutif', 'E3', 3), ('E3-4', 'eksekutif', 'E3', 4), ('E3-5', 'eksekutif', 'E3', 5),
-('E4-1', 'eksekutif', 'E4', 1), ('E4-2', 'eksekutif', 'E4', 2), ('E4-3', 'eksekutif', 'E4', 3), ('E4-4', 'eksekutif', 'E4', 4), ('E4-5', 'eksekutif', 'E4', 5)
-ON CONFLICT (id) DO NOTHING;
+-- 10. Seed Seats Data (Default Ballroom Setup: 12 Tables, 6 Seats Each)
+-- Executive Rows (Row 1, Tables E1 - E4, 24 Seats)
+INSERT INTO seats (id, kategori, row_name, table_name, seat_number) VALUES
+-- Table E1
+('E-R1-TE1-S1', 'eksekutif', 'Baris 1', 'Meja E1', 1),
+('E-R1-TE1-S2', 'eksekutif', 'Baris 1', 'Meja E1', 2),
+('E-R1-TE1-S3', 'eksekutif', 'Baris 1', 'Meja E1', 3),
+('E-R1-TE1-S4', 'eksekutif', 'Baris 1', 'Meja E1', 4),
+('E-R1-TE1-S5', 'eksekutif', 'Baris 1', 'Meja E1', 5),
+('E-R1-TE1-S6', 'eksekutif', 'Baris 1', 'Meja E1', 6),
+-- Table E2
+('E-R1-TE2-S1', 'eksekutif', 'Baris 1', 'Meja E2', 1),
+('E-R1-TE2-S2', 'eksekutif', 'Baris 1', 'Meja E2', 2),
+('E-R1-TE2-S3', 'eksekutif', 'Baris 1', 'Meja E2', 3),
+('E-R1-TE2-S4', 'eksekutif', 'Baris 1', 'Meja E2', 4),
+('E-R1-TE2-S5', 'eksekutif', 'Baris 1', 'Meja E2', 5),
+('E-R1-TE2-S6', 'eksekutif', 'Baris 1', 'Meja E2', 6),
+-- Table E3
+('E-R1-TE3-S1', 'eksekutif', 'Baris 1', 'Meja E3', 1),
+('E-R1-TE3-S2', 'eksekutif', 'Baris 1', 'Meja E3', 2),
+('E-R1-TE3-S3', 'eksekutif', 'Baris 1', 'Meja E3', 3),
+('E-R1-TE3-S4', 'eksekutif', 'Baris 1', 'Meja E3', 4),
+('E-R1-TE3-S5', 'eksekutif', 'Baris 1', 'Meja E3', 5),
+('E-R1-TE3-S6', 'eksekutif', 'Baris 1', 'Meja E3', 6),
+-- Table E4
+('E-R1-TE4-S1', 'eksekutif', 'Baris 1', 'Meja E4', 1),
+('E-R1-TE4-S2', 'eksekutif', 'Baris 1', 'Meja E4', 2),
+('E-R1-TE4-S3', 'eksekutif', 'Baris 1', 'Meja E4', 3),
+('E-R1-TE4-S4', 'eksekutif', 'Baris 1', 'Meja E4', 4),
+('E-R1-TE4-S5', 'eksekutif', 'Baris 1', 'Meja E4', 5),
+('E-R1-TE4-S6', 'eksekutif', 'Baris 1', 'Meja E4', 6);
 
--- Business B1 & B2 (7 seats each, 14 total)
-INSERT INTO seats (id, kategori, row_name, seat_number) VALUES
-('B1-1', 'bisnis', 'B1', 1), ('B1-2', 'bisnis', 'B1', 2), ('B1-3', 'bisnis', 'B1', 3), ('B1-4', 'bisnis', 'B1', 4), ('B1-5', 'bisnis', 'B1', 5), ('B1-6', 'bisnis', 'B1', 6), ('B1-7', 'bisnis', 'B1', 7),
-('B2-1', 'bisnis', 'B2', 1), ('B2-2', 'bisnis', 'B2', 2), ('B2-3', 'bisnis', 'B2', 3), ('B2-4', 'bisnis', 'B2', 4), ('B2-5', 'bisnis', 'B2', 5), ('B2-6', 'bisnis', 'B2', 6), ('B2-7', 'bisnis', 'B2', 7)
-ON CONFLICT (id) DO NOTHING;
+-- Business Rows (Row 2, Tables B1 - B4, 24 Seats)
+INSERT INTO seats (id, kategori, row_name, table_name, seat_number) VALUES
+-- Table B1
+('B-R2-TB1-S1', 'bisnis', 'Baris 2', 'Meja B1', 1),
+('B-R2-TB1-S2', 'bisnis', 'Baris 2', 'Meja B1', 2),
+('B-R2-TB1-S3', 'bisnis', 'Baris 2', 'Meja B1', 3),
+('B-R2-TB1-S4', 'bisnis', 'Baris 2', 'Meja B1', 4),
+('B-R2-TB1-S5', 'bisnis', 'Baris 2', 'Meja B1', 5),
+('B-R2-TB1-S6', 'bisnis', 'Baris 2', 'Meja B1', 6),
+-- Table B2
+('B-R2-TB2-S1', 'bisnis', 'Baris 2', 'Meja B2', 1),
+('B-R2-TB2-S2', 'bisnis', 'Baris 2', 'Meja B2', 2),
+('B-R2-TB2-S3', 'bisnis', 'Baris 2', 'Meja B2', 3),
+('B-R2-TB2-S4', 'bisnis', 'Baris 2', 'Meja B2', 4),
+('B-R2-TB2-S5', 'bisnis', 'Baris 2', 'Meja B2', 5),
+('B-R2-TB2-S6', 'bisnis', 'Baris 2', 'Meja B2', 6),
+-- Table B3
+('B-R2-TB3-S1', 'bisnis', 'Baris 2', 'Meja B3', 1),
+('B-R2-TB3-S2', 'bisnis', 'Baris 2', 'Meja B3', 2),
+('B-R2-TB3-S3', 'bisnis', 'Baris 2', 'Meja B3', 3),
+('B-R2-TB3-S4', 'bisnis', 'Baris 2', 'Meja B3', 4),
+('B-R2-TB3-S5', 'bisnis', 'Baris 2', 'Meja B3', 5),
+('B-R2-TB3-S6', 'bisnis', 'Baris 2', 'Meja B3', 6),
+-- Table B4
+('B-R2-TB4-S1', 'bisnis', 'Baris 2', 'Meja B4', 1),
+('B-R2-TB4-S2', 'bisnis', 'Baris 2', 'Meja B4', 2),
+('B-R2-TB4-S3', 'bisnis', 'Baris 2', 'Meja B4', 3),
+('B-R2-TB4-S4', 'bisnis', 'Baris 2', 'Meja B4', 4),
+('B-R2-TB4-S5', 'bisnis', 'Baris 2', 'Meja B4', 5),
+('B-R2-TB4-S6', 'bisnis', 'Baris 2', 'Meja B4', 6);
 
--- Business B3-B8 (6 seats each, 36 total)
-INSERT INTO seats (id, kategori, row_name, seat_number) VALUES
-('B3-1', 'bisnis', 'B3', 1), ('B3-2', 'bisnis', 'B3', 2), ('B3-3', 'bisnis', 'B3', 3), ('B3-4', 'bisnis', 'B3', 4), ('B3-5', 'bisnis', 'B3', 5), ('B3-6', 'bisnis', 'B3', 6),
-('B4-1', 'bisnis', 'B4', 1), ('B4-2', 'bisnis', 'B4', 2), ('B4-3', 'bisnis', 'B4', 3), ('B4-4', 'bisnis', 'B4', 4), ('B4-5', 'bisnis', 'B4', 5), ('B4-6', 'bisnis', 'B4', 6),
-('B5-1', 'bisnis', 'B5', 1), ('B5-2', 'bisnis', 'B5', 2), ('B5-3', 'bisnis', 'B5', 3), ('B5-4', 'bisnis', 'B5', 4), ('B5-5', 'bisnis', 'B5', 5), ('B5-6', 'bisnis', 'B5', 6),
-('B6-1', 'bisnis', 'B6', 1), ('B6-2', 'bisnis', 'B6', 2), ('B6-3', 'bisnis', 'B6', 3), ('B6-4', 'bisnis', 'B6', 4), ('B6-5', 'bisnis', 'B6', 5), ('B6-6', 'bisnis', 'B6', 6),
-('B7-1', 'bisnis', 'B7', 1), ('B7-2', 'bisnis', 'B7', 2), ('B7-3', 'bisnis', 'B7', 3), ('B7-4', 'bisnis', 'B7', 4), ('B7-5', 'bisnis', 'B7', 5), ('B7-6', 'bisnis', 'B7', 6),
-('B8-1', 'bisnis', 'B8', 1), ('B8-2', 'bisnis', 'B8', 2), ('B8-3', 'bisnis', 'B8', 3), ('B8-4', 'bisnis', 'B8', 4), ('B8-5', 'bisnis', 'B8', 5), ('B8-6', 'bisnis', 'B8', 6)
-ON CONFLICT (id) DO NOTHING;
+-- Business Rows (Row 3, Tables B5 - B8, 24 Seats)
+INSERT INTO seats (id, kategori, row_name, table_name, seat_number) VALUES
+-- Table B5
+('B-R3-TB5-S1', 'bisnis', 'Baris 3', 'Meja B5', 1),
+('B-R3-TB5-S2', 'bisnis', 'Baris 3', 'Meja B5', 2),
+('B-R3-TB5-S3', 'bisnis', 'Baris 3', 'Meja B5', 3),
+('B-R3-TB5-S4', 'bisnis', 'Baris 3', 'Meja B5', 4),
+('B-R3-TB5-S5', 'bisnis', 'Baris 3', 'Meja B5', 5),
+('B-R3-TB5-S6', 'bisnis', 'Baris 3', 'Meja B5', 6),
+-- Table B6
+('B-R3-TB6-S1', 'bisnis', 'Baris 3', 'Meja B6', 1),
+('B-R3-TB6-S2', 'bisnis', 'Baris 3', 'Meja B6', 2),
+('B-R3-TB6-S3', 'bisnis', 'Baris 3', 'Meja B6', 3),
+('B-R3-TB6-S4', 'bisnis', 'Baris 3', 'Meja B6', 4),
+('B-R3-TB6-S5', 'bisnis', 'Baris 3', 'Meja B6', 5),
+('B-R3-TB6-S6', 'bisnis', 'Baris 3', 'Meja B6', 6),
+-- Table B7
+('B-R3-TB7-S1', 'bisnis', 'Baris 3', 'Meja B7', 1),
+('B-R3-TB7-S2', 'bisnis', 'Baris 3', 'Meja B7', 2),
+('B-R3-TB7-S3', 'bisnis', 'Baris 3', 'Meja B7', 3),
+('B-R3-TB7-S4', 'bisnis', 'Baris 3', 'Meja B7', 4),
+('B-R3-TB7-S5', 'bisnis', 'Baris 3', 'Meja B7', 5),
+('B-R3-TB7-S6', 'bisnis', 'Baris 3', 'Meja B7', 6),
+-- Table B8
+('B-R3-TB8-S1', 'bisnis', 'Baris 3', 'Meja B8', 1),
+('B-R3-TB8-S2', 'bisnis', 'Baris 3', 'Meja B8', 2),
+('B-R3-TB8-S3', 'bisnis', 'Baris 3', 'Meja B8', 3),
+('B-R3-TB8-S4', 'bisnis', 'Baris 3', 'Meja B8', 4),
+('B-R3-TB8-S5', 'bisnis', 'Baris 3', 'Meja B8', 5),
+('B-R3-TB8-S6', 'bisnis', 'Baris 3', 'Meja B8', 6);

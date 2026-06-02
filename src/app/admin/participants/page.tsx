@@ -9,7 +9,8 @@ import {
   uploadParticipantsAction,
   generateBookingCodesAction,
   sendEmailsAction,
-  getParticipantsListAction
+  getParticipantsListAction,
+  deleteParticipantAction
 } from '@/app/actions/admin';
 import {
   Users,
@@ -24,7 +25,11 @@ import {
   AlertCircle,
   FileSpreadsheet,
   Check,
-  Printer
+  Printer,
+  Trash2,
+  AlertTriangle,
+  X,
+  Plus
 } from 'lucide-react';
 
 interface ParticipantDisplay {
@@ -47,6 +52,33 @@ export default function AdminDashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Participant Manual Delete State and Handler
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+
+  const handleDeleteParticipant = async () => {
+    if (!deleteTarget) return;
+
+    setActionLoading(deleteTarget);
+    setError(null);
+    setSuccessMsg(null);
+
+    try {
+      const res = await deleteParticipantAction(deleteTarget);
+      if (res.success) {
+        setSuccessMsg('Peserta berhasil dihapus.');
+        setDeleteTarget(null);
+        await fetchParticipants();
+      } else {
+        setError(res.error || 'Gagal menghapus peserta.');
+      }
+    } catch (err) {
+      console.error(err);
+      setError('Terjadi kesalahan server.');
+    } finally {
+      setActionLoading(null);
+    }
+  };
 
   // Authenticate Admin Session on Mount
   useEffect(() => {
@@ -221,7 +253,8 @@ export default function AdminDashboardPage() {
   }
 
   return (
-    <div className="min-h-screen p-6 max-w-7xl mx-auto flex flex-col gap-8">
+    <>
+      <div className="min-h-screen p-6 max-w-7xl mx-auto flex flex-col gap-8">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center pb-6 border-b border-slate-200 gap-4">
         <div>
@@ -249,6 +282,12 @@ export default function AdminDashboardPage() {
           Daftar Peserta
         </Link>
         <Link
+          href="/admin/participants/add"
+          className="px-4 py-2 rounded-xl border border-slate-200 bg-white text-slate-700 text-sm font-semibold shadow-sm hover:bg-slate-50 hover:border-slate-300 transition-all"
+        >
+          Tambah Peserta Manual
+        </Link>
+        <Link
           href="/admin/seats"
           className="px-4 py-2 rounded-xl border border-slate-200 bg-white text-slate-700 text-sm font-semibold shadow-sm hover:bg-slate-50 hover:border-slate-300 transition-all"
         >
@@ -258,18 +297,18 @@ export default function AdminDashboardPage() {
 
       {/* Message Notifications */}
       {error && (
-        <div className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/25 rounded-2xl text-sm text-red-200">
-          <AlertCircle className="w-5 h-5 text-red-400 shrink-0" />
-          <p className="flex-1">{error}</p>
-          <button onClick={() => setError(null)} className="text-xs text-slate-400 font-bold hover:text-white">Tutup</button>
+        <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-2xl text-sm text-red-800 shadow-sm">
+          <AlertCircle className="w-5 h-5 text-red-500 shrink-0" />
+          <p className="flex-1 font-medium">{error}</p>
+          <button onClick={() => setError(null)} className="text-xs text-red-400 font-bold hover:text-red-850">Tutup</button>
         </div>
       )}
 
       {successMsg && (
-        <div className="flex items-center gap-3 p-4 bg-emerald-500/10 border border-emerald-500/25 rounded-2xl text-sm text-emerald-200">
-          <Check className="w-5 h-5 text-emerald-400 shrink-0" />
-          <p className="flex-1">{successMsg}</p>
-          <button onClick={() => setSuccessMsg(null)} className="text-xs text-slate-400 font-bold hover:text-white">Tutup</button>
+        <div className="flex items-center gap-3 p-4 bg-emerald-50 border border-emerald-250 rounded-2xl text-sm text-emerald-800 shadow-sm">
+          <Check className="w-5 h-5 text-emerald-500 shrink-0" />
+          <p className="flex-1 font-medium">{successMsg}</p>
+          <button onClick={() => setSuccessMsg(null)} className="text-xs text-emerald-400 font-bold hover:text-emerald-850">Tutup</button>
         </div>
       )}
 
@@ -281,27 +320,27 @@ export default function AdminDashboardPage() {
             <p className="text-3xl font-black text-slate-900">{totalCount}</p>
           </div>
           <div className="w-12 h-12 bg-sky-500/10 rounded-xl flex items-center justify-center border border-sky-500/25">
-            <Users className="w-6 h-6 text-sky-400" />
+            <Users className="w-6 h-6 text-sky-500" />
           </div>
         </div>
 
         <div className="glass-card p-6 rounded-2xl border border-slate-200 flex items-center justify-between shadow">
           <div className="space-y-1">
             <span className="text-xs text-slate-500 font-bold uppercase tracking-wider">Sudah Check-in</span>
-            <p className="text-3xl font-black text-emerald-400">{checkedInCount}</p>
+            <p className="text-3xl font-black text-emerald-600">{checkedInCount}</p>
           </div>
           <div className="w-12 h-12 bg-emerald-500/10 rounded-xl flex items-center justify-center border border-emerald-500/25">
-            <CheckCircle className="w-6 h-6 text-emerald-400" />
+            <CheckCircle className="w-6 h-6 text-emerald-600" />
           </div>
         </div>
 
         <div className="glass-card p-6 rounded-2xl border border-slate-200 flex items-center justify-between shadow">
           <div className="space-y-1">
             <span className="text-xs text-slate-500 font-bold uppercase tracking-wider">Belum Check-in</span>
-            <p className="text-3xl font-black text-yellow-400">{pendingCheckIn}</p>
+            <p className="text-3xl font-black text-amber-600">{pendingCheckIn}</p>
           </div>
           <div className="w-12 h-12 bg-yellow-500/10 rounded-xl flex items-center justify-center border border-yellow-500/25">
-            <Clock className="w-6 h-6 text-yellow-400" />
+            <Clock className="w-6 h-6 text-amber-500" />
           </div>
         </div>
       </div>
@@ -446,17 +485,29 @@ export default function AdminDashboardPage() {
                       )}
                     </td>
                     <td className="py-4 px-6 text-center">
-                      {p.checkedIn && p.seatId ? (
-                        <Link
-                          href={`/admin/participants/${p.id}/boarding-pass`}
-                          className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-700 hover:text-sky-600 hover:border-sky-300 hover:bg-sky-50 transition-all shadow-sm text-xs font-semibold"
+                      <div className="flex items-center justify-center gap-2">
+                        {p.checkedIn && p.seatId ? (
+                          <Link
+                            href={`/admin/participants/${p.id}/boarding-pass`}
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-slate-200 bg-white text-slate-700 hover:text-sky-600 hover:border-sky-300 hover:bg-sky-50 transition-all shadow-sm text-xs font-semibold"
+                          >
+                            <Printer className="w-3.5 h-3.5 text-sky-500" />
+                            <span>Cetak</span>
+                          </Link>
+                        ) : null}
+                        <button
+                          onClick={() => setDeleteTarget(p.id)}
+                          disabled={actionLoading !== null}
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-slate-200 bg-white text-slate-600 hover:text-red-500 hover:border-red-200 hover:bg-red-50 transition-all shadow-sm text-xs font-semibold disabled:opacity-50"
                         >
-                          <Printer className="w-3.5 h-3.5" />
-                          <span>Cetak Ticket</span>
-                        </Link>
-                      ) : (
-                        <span className="text-xs text-slate-400">-</span>
-                      )}
+                          {actionLoading === p.id ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <Trash2 className="w-3.5 h-3.5 text-red-500" />
+                          )}
+                          <span>Hapus</span>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -466,5 +517,46 @@ export default function AdminDashboardPage() {
         </div>
       </div>
     </div>
+
+    {/* Delete Confirmation Modal */}
+    {deleteTarget && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm animate-fade-in">
+        <div className="w-full max-w-md rounded-3xl bg-white border border-slate-200 shadow-2xl overflow-hidden p-6 space-y-6">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-red-50 border border-red-100 flex items-center justify-center shrink-0">
+              <AlertTriangle className="w-6 h-6 text-red-500" />
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-lg font-bold text-slate-900">Hapus Peserta?</h3>
+              <p className="text-xs text-slate-500 leading-normal">
+                Tindakan ini akan menghapus peserta secara permanen dari sistem dan membatalkan pesanan kursi mereka jika sudah melakukan check-in.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex gap-3 justify-end pt-3 border-t border-slate-200">
+            <button
+              onClick={() => setDeleteTarget(null)}
+              className="px-4 py-2 rounded-xl border border-slate-200 bg-white text-slate-650 hover:text-slate-900 text-xs font-semibold"
+            >
+              Batal
+            </button>
+            <button
+              onClick={handleDeleteParticipant}
+              disabled={actionLoading !== null}
+              className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-semibold flex items-center gap-1.5 transition-all shadow"
+            >
+              {actionLoading === deleteTarget ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <Trash2 className="w-3.5 h-3.5" />
+              )}
+              <span>Ya, Hapus</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   );
 }

@@ -5,6 +5,17 @@ import { useRouter } from 'next/navigation';
 import { useCheckIn } from '@/context/CheckInContext';
 import { Plane, Download, Printer, ArrowLeft, RefreshCw, Calendar, MapPin } from 'lucide-react';
 
+const formatSeatId = (id: string) => {
+  if (!id) return '';
+  const parts = id.split('-');
+  if (parts.length >= 4) {
+    const table = parts[2].replace('Meja', 'Meja ');
+    const seat = parts[3].replace('S', '');
+    return `${table} - Kursi ${seat}`;
+  }
+  return id;
+};
+
 export default function BoardingPassPage() {
   const router = useRouter();
   const { participant, selectedSeatId, logout, loading } = useCheckIn();
@@ -170,7 +181,7 @@ export default function BoardingPassPage() {
                 </div>
                 <div>
                   <span className="block text-[9px] uppercase tracking-wider text-slate-500">SEAT</span>
-                  <span className="text-xs font-semibold text-slate-700">{selectedSeatId}</span>
+                  <span className="text-xs font-semibold text-slate-700">{formatSeatId(selectedSeatId)}</span>
                 </div>
               </div>
             </div>
@@ -223,7 +234,7 @@ export default function BoardingPassPage() {
             <div className="flex justify-between items-center">
               <span className="text-[9px] font-bold text-orange-400 uppercase tracking-widest">DETACHABLE STUB</span>
               <span className="text-[10px] font-extrabold text-slate-900 bg-orange-500/10 px-2 py-0.5 rounded border border-orange-500/20">
-                {selectedSeatId}
+                {formatSeatId(selectedSeatId)}
               </span>
             </div>
 

@@ -6,32 +6,81 @@ import { useRouter } from 'next/navigation';
 import {
   checkAdminSessionAction,
   adminLogoutAction,
-  createSeatAction,
-  deleteSeatAction,
-  getSeatsListAction
+  getSeatsListAction,
+  generateSeatingLayoutAction,
+  SeatingRowConfig,
+  SeatingTableConfig
 } from '@/app/actions/admin';
-import { LogOut, Loader2, AlertCircle, Plus, Trash2, Route, Users, Crown, LayoutGrid, X, AlertTriangle } from 'lucide-react';
+import {
+  LogOut,
+  Loader2,
+  AlertCircle,
+  Plus,
+  Trash2,
+  LayoutGrid,
+  AlertTriangle,
+  Save,
+  CheckCircle,
+  Undo
+} from 'lucide-react';
 
 interface SeatRecord {
   id: string;
   kategori: 'eksekutif' | 'bisnis';
   row_name: string;
+  table_name: string;
   seat_number: number;
-  created_at?: string;
 }
 
 export default function AdminSeatsPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [seats, setSeats] = useState<SeatRecord[]>([]);
-  const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [activeSeats, setActiveSeats] = useState<SeatRecord[]>([]);
+  const [actionLoading, setActionLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
-  const [category, setCategory] = useState<'eksekutif' | 'bisnis'>('bisnis');
-  const [rowName, setRowName] = useState('B9');
-  const [seatNumber, setSeatNumber] = useState('1');
-  const [deleteTarget, setDeleteTarget] = useState<SeatRecord | null>(null);
-  const [showAddSeatModal, setShowAddSeatModal] = useState(false);
+
+  // Layout Configuration Form States
+  const [newKategori, setNewKategori] = useState<'eksekutif' | 'bisnis'>('eksekutif');
+  const [newRowName, setNewRowName] = useState('Baris 1');
+  const [newTablesCount, setNewTablesCount] = useState(4);
+  const [defaultSeatsPerTable, setDefaultSeatsPerTable] = useState(6);
+
+  // Current config draft
+  const [layoutConfig, setLayoutConfig] = useState<SeatingRowConfig[]>([
+    {
+      kategori: 'eksekutif',
+      row_name: 'Baris 1',
+      tables: [
+        { table_name: 'Meja E1', seats_count: 6 },
+        { table_name: 'Meja E2', seats_count: 6 },
+        { table_name: 'Meja E3', seats_count: 6 },
+        { table_name: 'Meja E4', seats_count: 6 }
+      ]
+    },
+    {
+      kategori: 'bisnis',
+      row_name: 'Baris 2',
+      tables: [
+        { table_name: 'Meja B1', seats_count: 6 },
+        { table_name: 'Meja B2', seats_count: 6 },
+        { table_name: 'Meja B3', seats_count: 6 },
+        { table_name: 'Meja B4', seats_count: 6 }
+      ]
+    },
+    {
+      kategori: 'bisnis',
+      row_name: 'Baris 3',
+      tables: [
+        { table_name: 'Meja B5', seats_count: 6 },
+        { table_name: 'Meja B6', seats_count: 6 },
+        { table_name: 'Meja B7', seats_count: 6 },
+        { table_name: 'Meja B8', seats_count: 6 }
+      ]
+    }
+  ]);
+
+  const [showConfirmResetModal, setShowConfirmResetModal] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -40,21 +89,18 @@ export default function AdminSeatsPage() {
         router.push('/admin');
         return;
       }
-
-      await fetchSeats();
+      await fetchActiveSeats();
     };
-
     checkAuth();
   }, [router]);
 
-  const fetchSeats = async () => {
-    setError(null);
+  const fetchActiveSeats = async () => {
     try {
       const res = await getSeatsListAction();
       if (res.success && res.seats) {
-        setSeats(res.seats as SeatRecord[]);
+        setActiveSeats(res.seats as SeatRecord[]);
       } else {
-        setError(res.error || 'Gagal mengambil daftar kursi.');
+        setError(res.error || 'Gagal mengambil data kursi aktif.');
       }
     } catch (err) {
       console.error(err);
@@ -69,456 +115,464 @@ export default function AdminSeatsPage() {
     router.push('/admin');
   };
 
-  const handleAddSeat = async (e: React.FormEvent) => {
+  // Add a new row to configuration draft
+  const handleAddRowConfig = (e: React.FormEvent) => {
     e.preventDefault();
-    setActionLoading('add');
-    setError(null);
-    setSuccessMsg(null);
+    if (!newRowName.trim()) {
+      setError('Nama baris tidak boleh kosong.');
+      return;
+    }
 
-    try {
-      const res = await createSeatAction({
-        kategori: category,
-        row_name: rowName,
-        seat_number: Number(seatNumber),
+    // Check if row name already exists in config
+    if (layoutConfig.some(row => row.row_name.toLowerCase() === newRowName.trim().toLowerCase())) {
+      setError(`Baris dengan nama "${newRowName}" sudah terdaftar.`);
+      return;
+    }
+
+    const tables: SeatingTableConfig[] = [];
+    const prefix = newKategori === 'eksekutif' ? 'E' : 'B';
+    
+    // Auto-generate tables based on row and count
+    // e.g. for Row 1, Tables: Meja E1, Meja E2, etc.
+    // Or let's name them: Meja R<RowNumber> - T<TableNumber>
+    const rowClean = newRowName.replace(/\D/g, ''); // get only numbers if any
+    const rowNum = rowClean || '1';
+
+    for (let i = 1; i <= newTablesCount; i++) {
+      tables.push({
+        table_name: `Meja ${prefix}${rowNum}-${i}`,
+        seats_count: defaultSeatsPerTable
       });
+    }
 
-      if (res.success) {
-        setSuccessMsg(`Kursi ${rowName}-${seatNumber} berhasil ditambahkan.`);
-        setShowAddSeatModal(false);
-        await fetchSeats();
-      } else {
-        setError(res.error || 'Gagal menambah kursi.');
-      }
-    } catch (err) {
-      console.error(err);
-      setError('Terjadi kesalahan server.');
-    } finally {
-      setActionLoading(null);
+    setLayoutConfig([...layoutConfig, {
+      kategori: newKategori,
+      row_name: newRowName.trim(),
+      tables
+    }]);
+
+    setSuccessMsg(`Baris "${newRowName}" berhasil ditambahkan ke draft.`);
+    
+    // Increment default row name for ease of use
+    const nextRowMatch = newRowName.match(/\d+/);
+    if (nextRowMatch) {
+      const nextNum = parseInt(nextRowMatch[0]) + 1;
+      setNewRowName(newRowName.replace(/\d+/, nextNum.toString()));
     }
   };
 
-  const handleDeleteSeat = async () => {
-    if (!deleteTarget) return;
+  // Delete a row configuration from draft
+  const handleDeleteRowConfig = (index: number) => {
+    const updated = [...layoutConfig];
+    updated.splice(index, 1);
+    setLayoutConfig(updated);
+  };
 
-    const seatId = deleteTarget.id;
-    setActionLoading(seatId);
+  // Update a specific table seats count in draft
+  const handleTableSeatsChange = (rowIndex: number, tableIndex: number, seatsCount: number) => {
+    const updated = [...layoutConfig];
+    updated[rowIndex].tables[tableIndex].seats_count = Math.max(1, seatsCount);
+    setLayoutConfig(updated);
+  };
+
+  // Update a specific table name in draft
+  const handleTableNameChange = (rowIndex: number, tableIndex: number, newName: string) => {
+    const updated = [...layoutConfig];
+    updated[rowIndex].tables[tableIndex].table_name = newName;
+    setLayoutConfig(updated);
+  };
+
+  // Submit and Save configuration to Database
+  const handleSaveLayout = async () => {
+    setActionLoading(true);
     setError(null);
     setSuccessMsg(null);
 
     try {
-      const res = await deleteSeatAction(seatId);
+      const res = await generateSeatingLayoutAction(layoutConfig);
       if (res.success) {
-        setSuccessMsg(`Kursi ${seatId} berhasil dihapus.`);
-        await fetchSeats();
+        setSuccessMsg(`Berhasil memperbarui layout! Total ${res.count} kursi dibuat.`);
+        setShowConfirmResetModal(false);
+        await fetchActiveSeats();
       } else {
-        setError(res.error || 'Gagal menghapus kursi.');
+        setError(res.error || 'Gagal menyimpan layout kursi.');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      setError('Terjadi kesalahan server.');
+      setError('Terjadi kesalahan server saat menyimpan layout.');
     } finally {
-      setActionLoading(null);
-      setDeleteTarget(null);
+      setActionLoading(false);
     }
   };
 
-  const groupedSeats = useMemo(() => {
-    return {
-      eksekutif: seats.filter((seat) => seat.kategori === 'eksekutif'),
-      bisnis: seats.filter((seat) => seat.kategori === 'bisnis'),
-    };
-  }, [seats]);
+  // Aggregate stats from layout draft
+  const draftStats = useMemo(() => {
+    let tablesCount = 0;
+    let seatsCount = 0;
+    layoutConfig.forEach(row => {
+      tablesCount += row.tables.length;
+      row.tables.forEach(table => {
+        seatsCount += table.seats_count;
+      });
+    });
+    return { tablesCount, seatsCount };
+  }, [layoutConfig]);
 
-  const previewRows = useMemo(() => {
+  // Aggregate stats from active DB seats
+  const activeStats = useMemo(() => {
+    const uniqueTables = new Set(activeSeats.map(s => s.table_name));
     return {
-      eksekutif: ['E1', 'E2', 'E3', 'E4'],
-      bisnis: ['B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8'],
+      tablesCount: uniqueTables.size,
+      seatsCount: activeSeats.length
     };
-  }, []);
+  }, [activeSeats]);
 
-  const getPreviewSeatTone = (kategori: 'eksekutif' | 'bisnis') =>
-    kategori === 'eksekutif'
-      ? 'border-sky-200 bg-sky-50 text-sky-700'
-      : 'border-indigo-200 bg-indigo-50 text-indigo-700';
+  // Group active DB seats for display
+  const groupedActiveSeats = useMemo(() => {
+    const map = new Map<string, Map<string, SeatRecord[]>>();
+    
+    activeSeats.forEach(seat => {
+      if (!map.has(seat.row_name)) {
+        map.set(seat.row_name, new Map());
+      }
+      const rowMap = map.get(seat.row_name)!;
+      if (!rowMap.has(seat.table_name)) {
+        rowMap.set(seat.table_name, []);
+      }
+      rowMap.get(seat.table_name)!.push(seat);
+    });
+
+    return map;
+  }, [activeSeats]);
 
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-3">
-        <Loader2 className="w-8 h-8 text-sky-500 animate-spin" />
-        <span className="text-slate-600 text-sm">Memuat daftar kursi...</span>
+        <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
+        <span className="text-slate-600 text-sm">Memuat pengaturan layout...</span>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen p-6 max-w-7xl mx-auto flex flex-col gap-8">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center pb-6 border-b border-slate-200 gap-4">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center pb-6 border-b border-slate-800 gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></span>
-            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Portal Admin</span>
+            <span className="w-2.5 h-2.5 bg-orange-500 rounded-full animate-pulse"></span>
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Portal Admin</span>
           </div>
-          <h1 className="text-2xl font-extrabold text-slate-900">Kelola List Kursi</h1>
+          <h1 className="text-2xl font-extrabold text-white">Pengaturan Layout Denah Acara</h1>
         </div>
 
         <button
           onClick={handleLogout}
-          className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:border-red-500/20 hover:text-red-500 text-slate-600 font-semibold rounded-xl text-sm transition-all shadow-sm"
+          className="flex items-center gap-2 px-4 py-2.5 bg-slate-900 border border-slate-800 hover:border-red-500/20 hover:text-red-400 text-slate-400 font-semibold rounded-xl text-sm transition-all"
         >
           <LogOut className="w-4.5 h-4.5" />
           <span>Keluar Portal</span>
         </button>
       </div>
 
+      {/* Tabs */}
       <div className="flex flex-wrap gap-3">
         <Link
           href="/admin/participants"
-          className="px-4 py-2 rounded-xl border border-slate-200 bg-white text-slate-700 text-sm font-semibold shadow-sm hover:bg-slate-50 hover:border-slate-300 transition-all"
+          className="px-4 py-2 rounded-xl border border-slate-800 bg-slate-950 text-slate-400 hover:text-white text-sm font-semibold transition-all shadow-sm"
         >
           Daftar Peserta
         </Link>
         <Link
-          href="/admin/seats"
-          className="px-4 py-2 rounded-xl border border-slate-200 bg-slate-900 text-white text-sm font-semibold shadow-sm"
+          href="/admin/participants/add"
+          className="px-4 py-2 rounded-xl border border-slate-800 bg-slate-950 text-slate-400 hover:text-white text-sm font-semibold transition-all shadow-sm"
         >
-          Kelola Kursi
+          Tambah Peserta Manual
         </Link>
-        <button
-          onClick={() => setShowAddSeatModal(true)}
-          className="px-4 py-2 rounded-xl border border-sky-200 bg-sky-600 text-white text-sm font-semibold shadow-sm hover:bg-sky-500 transition-all inline-flex items-center gap-2"
+        <Link
+          href="/admin/seats"
+          className="px-4 py-2 rounded-xl border border-orange-500/30 bg-slate-900 text-white text-sm font-semibold shadow-sm"
         >
-          <Plus className="w-4 h-4" />
-          Tambah Kursi
-        </button>
+          Pengaturan Denah
+        </Link>
       </div>
 
+      {/* Message Notifications */}
       {error && (
-        <div className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/25 rounded-2xl text-sm text-red-700">
-          <AlertCircle className="w-5 h-5 text-red-500 shrink-0" />
+        <div className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/25 rounded-2xl text-sm text-red-200">
+          <AlertCircle className="w-5 h-5 text-red-400 shrink-0" />
           <p className="flex-1">{error}</p>
-          <button onClick={() => setError(null)} className="text-xs text-slate-500 font-bold hover:text-slate-900">Tutup</button>
+          <button onClick={() => setError(null)} className="text-xs text-slate-400 font-bold hover:text-white">Tutup</button>
         </div>
       )}
 
       {successMsg && (
-        <div className="flex items-center gap-3 p-4 bg-emerald-500/10 border border-emerald-500/25 rounded-2xl text-sm text-emerald-700">
-          <Crown className="w-5 h-5 text-emerald-500 shrink-0" />
+        <div className="flex items-center gap-3 p-4 bg-emerald-500/10 border border-emerald-500/25 rounded-2xl text-sm text-emerald-200">
+          <CheckCircle className="w-5 h-5 text-emerald-400 shrink-0" />
           <p className="flex-1">{successMsg}</p>
-          <button onClick={() => setSuccessMsg(null)} className="text-xs text-slate-500 font-bold hover:text-slate-900">Tutup</button>
+          <button onClick={() => setSuccessMsg(null)} className="text-xs text-slate-400 font-bold hover:text-white">Tutup</button>
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-[460px_1fr] gap-6 items-start">
-        <div className="glass-card p-7 rounded-3xl border border-slate-200 shadow-xl space-y-5 lg:sticky lg:top-6 lg:self-start">
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <LayoutGrid className="w-4.5 h-4.5 text-sky-500" />
-              <h3 className="text-sm font-bold text-slate-900">Preview Susunan Kursi</h3>
-            </div>
-            <p className="text-xs text-slate-600 mb-4">Preview mengikuti data kursi yang tersimpan, disusun vertikal per kategori.</p>
-
-            <div className="space-y-3">
-              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm font-bold text-slate-900">Eksekutif</span>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-sky-600 bg-sky-100 px-2.5 py-1 rounded-full">
-                    {groupedSeats.eksekutif.length} kursi
-                  </span>
-                </div>
-                <div className="space-y-2 overflow-x-auto pb-1">
-                  {previewRows.eksekutif.map((rowName) => {
-                    const rowSeats = groupedSeats.eksekutif.filter((seat) => seat.row_name === rowName);
-                    return (
-                      <div key={rowName} className="flex items-center gap-2 min-w-max">
-                        <span className="w-8 text-right text-xs font-bold text-slate-500">{rowName}</span>
-                        <div className="flex gap-1.5">
-                          {rowSeats.length > 0 ? (
-                            rowSeats.map((seat) => (
-                              <div
-                                key={seat.id}
-                                className={`w-7 h-7 rounded-md border text-[10px] font-bold flex items-center justify-center ${getPreviewSeatTone('eksekutif')}`}
-                                title={seat.id}
-                              >
-                                {seat.seat_number}
-                              </div>
-                            ))
-                          ) : (
-                            <span className="text-xs text-slate-400 italic">Belum ada kursi</span>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm font-bold text-slate-900">Bisnis</span>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 bg-indigo-100 px-2.5 py-1 rounded-full">
-                    {groupedSeats.bisnis.length} kursi
-                  </span>
-                </div>
-                <div className="space-y-2 overflow-x-auto pb-1">
-                  {previewRows.bisnis.map((rowName) => {
-                    const rowSeats = groupedSeats.bisnis.filter((seat) => seat.row_name === rowName);
-                    return (
-                      <div key={rowName} className="flex items-center gap-2 min-w-max">
-                        <span className="w-8 text-right text-xs font-bold text-slate-500">{rowName}</span>
-                        <div className="flex gap-1.5">
-                          {rowSeats.length > 0 ? (
-                            rowSeats.map((seat) => (
-                              <div
-                                key={seat.id}
-                                className={`w-7 h-7 rounded-md border text-[10px] font-bold flex items-center justify-center ${getPreviewSeatTone('bisnis')}`}
-                                title={seat.id}
-                              >
-                                {seat.seat_number}
-                              </div>
-                            ))
-                          ) : (
-                            <span className="text-xs text-slate-400 italic">Belum ada kursi</span>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
+      {/* Dashboard split */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_480px] gap-8 items-start">
+        
+        {/* Left Column: Seating Layout Draft Configurator */}
         <div className="space-y-6">
-          <div className="glass-card p-5 rounded-3xl border border-slate-200 shadow-xl">
-            <div className="flex items-center gap-2 mb-4">
-              <Route className="w-5 h-5 text-sky-500" />
-              <h2 className="text-lg font-bold text-slate-900">Kategori Eksekutif</h2>
+          {/* Add Row Form Card */}
+          <div className="glass-card p-6 rounded-3xl border border-slate-800 shadow-xl space-y-4">
+            <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
+              <Plus className="w-5 h-5 text-orange-400" />
+              <h2 className="text-md font-bold text-white">Tambah Baris & Meja Baru</h2>
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse text-left text-sm">
-                <thead className="bg-slate-100/80 border-b border-slate-200 text-slate-600 text-xs font-bold uppercase tracking-wider">
-                  <tr>
-                    <th className="py-3 px-4">Seat ID</th>
-                    <th className="py-3 px-4">Baris</th>
-                    <th className="py-3 px-4">Nomor</th>
-                    <th className="py-3 px-4 text-right">Aksi</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-200 text-slate-700">
-                  {groupedSeats.eksekutif.length === 0 ? (
-                    <tr>
-                      <td colSpan={4} className="py-10 px-4 text-center text-slate-500">Belum ada kursi eksekutif.</td>
-                    </tr>
-                  ) : (
-                    groupedSeats.eksekutif.map((seat) => (
-                      <tr key={seat.id} className="hover:bg-slate-50 transition-colors">
-                        <td className="py-3 px-4 font-mono font-semibold text-slate-900">{seat.id}</td>
-                        <td className="py-3 px-4">{seat.row_name}</td>
-                        <td className="py-3 px-4">{seat.seat_number}</td>
-                        <td className="py-3 px-4 text-right">
-                          <button
-                            onClick={() => setDeleteTarget(seat)}
-                            disabled={actionLoading === seat.id}
-                            className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-600 hover:text-red-500 hover:border-red-200 hover:bg-red-50 transition-all shadow-sm disabled:opacity-50"
-                          >
-                            {actionLoading === seat.id ? (
-                              <Loader2 className="w-4 h-4 animate-spin" />
-                            ) : (
-                              <Trash2 className="w-4 h-4" />
-                            )}
-                            <span>Hapus</span>
-                          </button>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <div className="glass-card p-5 rounded-3xl border border-slate-200 shadow-xl">
-            <div className="flex items-center gap-2 mb-4">
-              <Users className="w-5 h-5 text-indigo-500" />
-              <h2 className="text-lg font-bold text-slate-900">Kategori Bisnis</h2>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse text-left text-sm">
-                <thead className="bg-slate-100/80 border-b border-slate-200 text-slate-600 text-xs font-bold uppercase tracking-wider">
-                  <tr>
-                    <th className="py-3 px-4">Seat ID</th>
-                    <th className="py-3 px-4">Baris</th>
-                    <th className="py-3 px-4">Nomor</th>
-                    <th className="py-3 px-4 text-right">Aksi</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-200 text-slate-700">
-                  {groupedSeats.bisnis.length === 0 ? (
-                    <tr>
-                      <td colSpan={4} className="py-10 px-4 text-center text-slate-500">Belum ada kursi bisnis.</td>
-                    </tr>
-                  ) : (
-                    groupedSeats.bisnis.map((seat) => (
-                      <tr key={seat.id} className="hover:bg-slate-50 transition-colors">
-                        <td className="py-3 px-4 font-mono font-semibold text-slate-900">{seat.id}</td>
-                        <td className="py-3 px-4">{seat.row_name}</td>
-                        <td className="py-3 px-4">{seat.seat_number}</td>
-                        <td className="py-3 px-4 text-right">
-                          <button
-                            onClick={() => setDeleteTarget(seat)}
-                            disabled={actionLoading === seat.id}
-                            className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-600 hover:text-red-500 hover:border-red-200 hover:bg-red-50 transition-all shadow-sm disabled:opacity-50"
-                          >
-                            {actionLoading === seat.id ? (
-                              <Loader2 className="w-4 h-4 animate-spin" />
-                            ) : (
-                              <Trash2 className="w-4 h-4" />
-                            )}
-                            <span>Hapus</span>
-                          </button>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {showAddSeatModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm">
-          <div className="w-full max-w-lg rounded-3xl bg-white border border-slate-200 shadow-2xl overflow-hidden">
-            <div className="flex items-start justify-between p-5 border-b border-slate-200">
-              <div>
-                <h3 className="text-lg font-bold text-slate-900">Tambah Kursi Baru</h3>
-                <p className="text-sm text-slate-600 mt-1">Tambahkan baris dan nomor kursi untuk kategori eksekutif atau bisnis.</p>
-              </div>
-              <button
-                onClick={() => setShowAddSeatModal(false)}
-                className="w-9 h-9 rounded-xl border border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-50 flex items-center justify-center transition-all"
-                aria-label="Tutup modal"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <form onSubmit={handleAddSeat} className="p-5 space-y-4">
-              <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-700">Kategori</label>
+            
+            <form onSubmit={handleAddRowConfig} className="grid grid-cols-1 sm:grid-cols-4 gap-4 items-end">
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Kategori</label>
                 <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value as 'eksekutif' | 'bisnis')}
-                  className="w-full px-4 py-3 bg-white/85 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 shadow-sm"
+                  value={newKategori}
+                  onChange={(e) => setNewKategori(e.target.value as 'eksekutif' | 'bisnis')}
+                  className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white text-xs focus:outline-none focus:border-orange-500"
                 >
-                  <option value="bisnis">Bisnis</option>
                   <option value="eksekutif">Eksekutif</option>
+                  <option value="bisnis">Bisnis</option>
                 </select>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-700">Baris</label>
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Nama Baris</label>
                 <input
                   type="text"
-                  value={rowName}
-                  onChange={(e) => setRowName(e.target.value.toUpperCase())}
-                  placeholder="Contoh: B9 atau E5"
-                  className="w-full px-4 py-3 bg-white/85 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 shadow-sm"
+                  value={newRowName}
+                  onChange={(e) => setNewRowName(e.target.value)}
+                  placeholder="Contoh: Baris 4"
+                  className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white text-xs focus:outline-none focus:border-orange-500"
                 />
               </div>
 
-              <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-700">Nomor Kursi</label>
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Jumlah Meja</label>
                 <input
                   type="number"
                   min="1"
-                  value={seatNumber}
-                  onChange={(e) => setSeatNumber(e.target.value)}
-                  className="w-full px-4 py-3 bg-white/85 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 shadow-sm"
+                  max="15"
+                  value={newTablesCount}
+                  onChange={(e) => setNewTablesCount(Number(e.target.value))}
+                  className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white text-xs focus:outline-none focus:border-orange-500"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowAddSeatModal(false)}
-                  className="px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 text-sm font-semibold hover:bg-slate-50 transition-all"
-                >
-                  Batal
-                </button>
-                <button
-                  type="submit"
-                  disabled={actionLoading === 'add'}
-                  className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-semibold rounded-xl transition-all shadow-lg hover:shadow-sky-500/20 active:scale-[0.98] disabled:opacity-50"
-                >
-                  {actionLoading === 'add' ? (
-                    <>
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                      <span>Menyimpan...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Plus className="w-5 h-5" />
-                      <span>Tambah Kursi</span>
-                    </>
-                  )}
-                </button>
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Kursi per Meja</label>
+                <input
+                  type="number"
+                  min="1"
+                  max="12"
+                  value={defaultSeatsPerTable}
+                  onChange={(e) => setDefaultSeatsPerTable(Number(e.target.value))}
+                  className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white text-xs focus:outline-none focus:border-orange-500"
+                />
               </div>
+
+              <button
+                type="submit"
+                className="w-full sm:col-span-4 py-2.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-white font-semibold rounded-lg text-xs transition-all shadow"
+              >
+                + Tambah Baris ke Draft
+              </button>
             </form>
           </div>
-        </div>
-      )}
 
-      {deleteTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-3xl bg-white border border-slate-200 shadow-2xl overflow-hidden">
-            <div className="flex items-start justify-between p-5 border-b border-slate-200">
-              <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-2xl bg-red-50 border border-red-100 flex items-center justify-center">
-                  <AlertTriangle className="w-5 h-5 text-red-500" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-slate-900">Hapus kursi?</h3>
-                  <p className="text-sm text-slate-600">Tindakan ini tidak bisa dibatalkan.</p>
-                </div>
+          {/* Draft Visual Configurator */}
+          <div className="glass-card p-6 rounded-3xl border border-slate-800 shadow-xl space-y-6">
+            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+              <div className="flex items-center gap-2">
+                <LayoutGrid className="w-5 h-5 text-orange-400" />
+                <h2 className="text-md font-bold text-white">Draft Layout Meja & Kursi</h2>
               </div>
-              <button
-                onClick={() => setDeleteTarget(null)}
-                className="w-9 h-9 rounded-xl border border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-50 flex items-center justify-center transition-all"
-                aria-label="Tutup modal"
-              >
-                <X className="w-4 h-4" />
-              </button>
+              <span className="text-[10px] text-slate-400">
+                Draft: <strong>{draftStats.tablesCount} Meja</strong>, <strong>{draftStats.seatsCount} Kursi</strong>
+              </span>
             </div>
 
-            <div className="p-5 space-y-4">
-              <p className="text-sm text-slate-700">
-                Anda akan menghapus kursi <span className="font-bold text-slate-900">{deleteTarget.id}</span>.
-                Pastikan kursi ini memang sudah tidak dipakai.
-              </p>
+            {layoutConfig.length === 0 ? (
+              <p className="text-xs text-slate-500 text-center py-8 italic">Tidak ada baris terdaftar dalam draft. Tambahkan di atas.</p>
+            ) : (
+              <div className="space-y-6">
+                {layoutConfig.map((row, rIdx) => (
+                  <div key={rIdx} className="bg-slate-900/40 border border-slate-900 rounded-2xl p-4 space-y-4">
+                    {/* Row Header */}
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs font-bold text-white bg-slate-950 px-3 py-1 rounded-md border border-slate-800">
+                          {row.row_name}
+                        </span>
+                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border
+                          ${row.kategori === 'eksekutif' ? 'bg-orange-500/10 border-orange-500/25 text-orange-400' : 'bg-indigo-500/10 border-indigo-500/25 text-indigo-400'}
+                        `}>
+                          {row.kategori}
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => handleDeleteRowConfig(rIdx)}
+                        className="text-xs text-slate-500 hover:text-red-400 flex items-center gap-1.5 transition-colors"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        <span>Hapus Baris</span>
+                      </button>
+                    </div>
 
-              <div className="flex items-center justify-end gap-3">
-                <button
-                  onClick={() => setDeleteTarget(null)}
-                  className="px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 text-sm font-semibold hover:bg-slate-50 transition-all"
-                >
-                  Batal
-                </button>
-                <button
-                  onClick={handleDeleteSeat}
-                  disabled={actionLoading === deleteTarget.id}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white text-sm font-semibold transition-all disabled:opacity-50"
-                >
-                  {actionLoading === deleteTarget.id ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Trash2 className="w-4 h-4" />
-                  )}
-                  <span>Ya, hapus</span>
-                </button>
+                    {/* Tables grid configurator */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                      {row.tables.map((table, tIdx) => (
+                        <div key={tIdx} className="bg-slate-950/60 border border-slate-800/80 p-3 rounded-xl space-y-2.5">
+                          {/* Table Name */}
+                          <div className="space-y-1">
+                            <span className="text-[9px] uppercase tracking-wider text-slate-500 font-bold">Nama Meja</span>
+                            <input
+                              type="text"
+                              value={table.table_name}
+                              onChange={(e) => handleTableNameChange(rIdx, tIdx, e.target.value)}
+                              className="w-full px-2 py-1 bg-slate-900 border border-slate-800 rounded text-white text-xs font-bold"
+                            />
+                          </div>
+
+                          {/* Table Seats Count */}
+                          <div className="space-y-1">
+                            <span className="text-[9px] uppercase tracking-wider text-slate-500 font-bold">Jumlah Kursi</span>
+                            <input
+                              type="number"
+                              min="1"
+                              max="12"
+                              value={table.seats_count}
+                              onChange={(e) => handleTableSeatsChange(rIdx, tIdx, Number(e.target.value))}
+                              className="w-full px-2 py-1 bg-slate-900 border border-slate-800 rounded text-white text-xs font-mono font-bold"
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
               </div>
+            )}
+          </div>
+        </div>
+
+        {/* Right Column: Active Seating Summary & Saving trigger */}
+        <div className="space-y-6">
+          {/* Apply Card */}
+          <div className="glass-card p-6 rounded-3xl border border-slate-800 shadow-xl space-y-4 relative overflow-hidden">
+            {/* Border glow */}
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-orange-500 to-amber-500"></div>
+
+            <h3 className="text-sm font-bold text-white uppercase tracking-wider">Simpan Layout</h3>
+            
+            <div className="space-y-3 py-2 border-y border-slate-800 text-xs">
+              <div className="flex justify-between">
+                <span className="text-slate-400">Total Meja Baru</span>
+                <span className="font-bold text-white">{draftStats.tablesCount} Meja</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-400">Total Kursi Baru</span>
+                <span className="font-bold text-orange-400">{draftStats.seatsCount} Kursi</span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 p-3 bg-red-500/10 border border-red-500/25 rounded-xl text-red-200 text-[10px] leading-relaxed">
+              <AlertTriangle className="w-5 h-5 text-red-400 shrink-0" />
+              <span>
+                <strong>PERINGATAN:</strong> Menyimpan layout baru akan <strong>MENGHAPUS</strong> seluruh data meja/kursi aktif saat ini dan <strong>MEMBATALKAN</strong> check-in / booking semua peserta yang ada!
+              </span>
+            </div>
+
+            <button
+              onClick={() => setShowConfirmResetModal(true)}
+              disabled={actionLoading || draftStats.seatsCount === 0}
+              className="w-full py-3 bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-400 hover:to-amber-500 text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-orange-500/20 active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2 text-xs"
+            >
+              <Save className="w-4 h-4" />
+              <span>Terapkan Layout Baru</span>
+            </button>
+          </div>
+
+          {/* Active Seating Layout Display */}
+          <div className="glass-card p-6 rounded-3xl border border-slate-800 shadow-xl space-y-4">
+            <h3 className="text-sm font-bold text-white uppercase tracking-wider border-b border-slate-800 pb-3">Layout Aktif (Database)</h3>
+            
+            <div className="flex gap-4 text-xs bg-slate-950 p-3 rounded-2xl border border-slate-900/60 justify-around text-center">
+              <div>
+                <span className="text-[10px] text-slate-500 uppercase block">Total Meja</span>
+                <span className="text-sm font-bold text-white">{activeStats.tablesCount}</span>
+              </div>
+              <div className="w-px bg-slate-800"></div>
+              <div>
+                <span className="text-[10px] text-slate-500 uppercase block">Total Kursi</span>
+                <span className="text-sm font-bold text-orange-400">{activeStats.seatsCount}</span>
+              </div>
+            </div>
+
+            {activeSeats.length === 0 ? (
+              <p className="text-xs text-slate-500 text-center py-6 italic">Database kosong. Gunakan panel draf untuk membuat layout.</p>
+            ) : (
+              <div className="space-y-4 max-h-[300px] overflow-y-auto pr-1">
+                {Array.from(groupedActiveSeats.entries()).map(([rowName, rowMap]) => (
+                  <div key={rowName} className="space-y-2 border-b border-slate-900 pb-3 last:border-0 last:pb-0">
+                    <span className="text-[10px] font-bold text-slate-400 bg-slate-900 px-2 py-0.5 rounded">{rowName}</span>
+                    <div className="grid grid-cols-2 gap-2 mt-1">
+                      {Array.from(rowMap.entries()).map(([tableName, seatList]) => (
+                        <div key={tableName} className="bg-slate-900/40 p-2 rounded-lg flex justify-between items-center border border-slate-900">
+                          <span className="text-xs font-semibold text-slate-300">{tableName}</span>
+                          <span className="text-[10px] font-bold bg-slate-950 px-2 py-0.5 rounded text-orange-400 border border-slate-800">
+                            {seatList.length} Kursi
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+      </div>
+
+      {/* Confirmation Reset Warning Modal */}
+      {showConfirmResetModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-3xl bg-slate-950 border border-slate-800 shadow-2xl overflow-hidden relative p-6 space-y-6">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-red-500/10 border border-red-500/25 flex items-center justify-center shrink-0">
+                <AlertTriangle className="w-6 h-6 text-red-500" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-lg font-bold text-white">Terapkan Layout Baru?</h3>
+                <p className="text-xs text-slate-400 leading-normal">
+                  Tindakan ini akan mengosongkan data kursi yang lama, menghapus semua database check-in, dan membatalkan pesanan kursi dari semua peserta.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-3 justify-end pt-3 border-t border-slate-900">
+              <button
+                onClick={() => setShowConfirmResetModal(false)}
+                className="px-4 py-2 rounded-xl border border-slate-800 bg-slate-900 text-slate-300 hover:text-white text-xs font-semibold"
+              >
+                Batal
+              </button>
+              <button
+                onClick={handleSaveLayout}
+                disabled={actionLoading}
+                className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-semibold flex items-center gap-1.5 transition-all shadow"
+              >
+                {actionLoading ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Save className="w-3.5 h-3.5" />
+                )}
+                <span>Ya, Hapus & Simpan Layout</span>
+              </button>
             </div>
           </div>
         </div>

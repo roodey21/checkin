@@ -120,6 +120,7 @@ export async function getSeatsStatusAction() {
       .from('seats')
       .select('*')
       .order('row_name', { ascending: true })
+      .order('table_name', { ascending: true })
       .order('seat_number', { ascending: true });
 
     if (sError) throw sError;
