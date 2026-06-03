@@ -10,7 +10,7 @@ import {
   confirmBookingAction,
   getSeatsStatusAction
 } from '@/app/actions/booking';
-import { Plane, AlertTriangle, Clock, Check, ShieldAlert, LogOut, ArrowLeft, Users } from 'lucide-react';
+import { Plane, AlertTriangle, Clock, Check, ShieldAlert, LogOut, ArrowLeft, Users, Move } from 'lucide-react';
 
 interface Seat {
   id: string;
@@ -45,11 +45,34 @@ export default function SeatSelectionPage() {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const hasAutoFocusedRef = useRef(false);
 
-  // Zoom view state
-  // If a table is active, we focus/zoom in on it.
-  const [activeTable, setActiveTable] = useState<string | null>(null);
-  // Track zoom transition class
-  const [zoomTransition, setZoomTransition] = useState(false);
+  // Scroll and Drag state
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!scrollContainerRef.current) return;
+    setIsDragging(true);
+    setStartX(e.clientX - scrollContainerRef.current.offsetLeft);
+    setScrollLeft(scrollContainerRef.current.scrollLeft);
+  };
+
+  const handleMouseLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !scrollContainerRef.current) return;
+    e.preventDefault();
+    const x = e.clientX - scrollContainerRef.current.offsetLeft;
+    const walk = (x - startX) * 1.5;
+    scrollContainerRef.current.scrollLeft = scrollLeft - walk;
+  };
 
   // Redirect if no participant session
   useEffect(() => {
@@ -134,14 +157,18 @@ export default function SeatSelectionPage() {
     };
   }, [lockExpiresAt, selectedSeatId]);
 
-  // Auto-focus table if user already has a selected seat (for returning sessions) on mount
+  // Auto-scroll to selected table on mount
   useEffect(() => {
-    if (selectedSeatId && seats.length > 0 && !hasAutoFocusedRef.current) {
+    if (selectedSeatId && seats.length > 0 && !hasAutoFocusedRef.current && scrollContainerRef.current) {
       const activeSeat = seats.find(s => s.id === selectedSeatId);
       if (activeSeat) {
         hasAutoFocusedRef.current = true;
-        setActiveTable(activeSeat.table_name);
-        setZoomTransition(true);
+        setTimeout(() => {
+          const tableEl = document.getElementById(`table-${activeSeat.table_name}`);
+          if (tableEl) {
+            tableEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+          }
+        }, 300);
       }
     }
   }, [selectedSeatId, seats]);
@@ -241,7 +268,6 @@ export default function SeatSelectionPage() {
       }>;
     }[] = [];
 
-    // Grouping logic
     const rowNames = Array.from(new Set(seats.map(s => s.row_name)));
     
     rowNames.forEach(rowName => {
@@ -252,7 +278,6 @@ export default function SeatSelectionPage() {
       const tables = tableNames.map(tableName => {
         const tableSeats = rowSeats.filter(s => s.table_name === tableName);
         
-        // Count occupied seats (booked or locked by other)
         let occupied = 0;
         tableSeats.forEach(seat => {
           const isBooked = bookings.some(b => b.seat_id === seat.id);
@@ -263,11 +288,13 @@ export default function SeatSelectionPage() {
           }
         });
 
+        const sortedSeats = [...tableSeats].sort((a, b) => a.seat_number - b.seat_number);
+
         return {
           table_name: tableName,
-          total_seats: tableSeats.length,
+          total_seats: sortedSeats.length,
           occupied_seats: occupied,
-          seat_list: tableSeats
+          seat_list: sortedSeats
         };
       });
 
@@ -281,27 +308,6 @@ export default function SeatSelectionPage() {
     return groupedRows;
   }, [seats, bookings, locks, participant]);
 
-  const handleTableClick = (tableName: string, isEligible: boolean) => {
-    if (!isEligible) {
-      setError(`Meja ini termasuk dalam kelas ${isEligible ? '' : 'yang tidak sesuai dengan pendaftaran Anda'}. Kategori Anda: ${participant?.kategori.toUpperCase()}.`);
-      return;
-    }
-    setError(null);
-    setZoomTransition(false);
-    setActiveTable(tableName);
-    // Trigger smooth fade zoom transition
-    setTimeout(() => {
-      setZoomTransition(true);
-    }, 50);
-  };
-
-  const handleBackToBallroom = () => {
-    setZoomTransition(false);
-    setTimeout(() => {
-      setActiveTable(null);
-    }, 200); // match duration-200
-  };
-
   const getSeatStatus = (seatId: string) => {
     const isBooked = bookings.some((b) => b.seat_id === seatId);
     if (isBooked) return 'booked';
@@ -314,20 +320,6 @@ export default function SeatSelectionPage() {
     return 'available';
   };
 
-  // Radial positioning style for circular seats
-  const getRadialStyles = (index: number, total: number) => {
-    const angle = (index * 2 * Math.PI) / total - Math.PI / 2; // Offset -90deg so seat 1 is at top center
-    const radius = 105; // radius distance from center circle in pixels
-    const x = Math.cos(angle) * radius;
-    const y = Math.sin(angle) * radius;
-    return {
-      transform: `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`,
-      left: '50%',
-      top: '50%',
-      position: 'absolute' as const
-    };
-  };
-
   if (sessionLoading || !participant || loading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-3">
@@ -336,9 +328,6 @@ export default function SeatSelectionPage() {
       </div>
     );
   }
-
-  // Find the seat list of the currently active table
-  const activeTableInfo = seats.filter(s => s.table_name === activeTable);
 
   return (
     <div className="min-h-screen py-8 px-4 flex flex-col items-center justify-start max-w-6xl mx-auto">
@@ -368,7 +357,7 @@ export default function SeatSelectionPage() {
               if (selectedSeatId) unlockSeatAction(participant.id);
               logout();
             }}
-            className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 text-slate-600 hover:text-red-500 hover:border-red-500/20 hover:bg-red-50 rounded-xl text-sm transition-all shadow-sm font-semibold"
+            className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 text-slate-650 hover:text-red-550 hover:border-red-500/20 hover:bg-red-50 rounded-xl text-sm transition-all shadow-sm font-semibold"
           >
             <LogOut className="w-4 h-4" />
             <span>Keluar</span>
@@ -377,7 +366,7 @@ export default function SeatSelectionPage() {
       </div>
 
       {error && (
-        <div className="w-full flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-2xl text-sm text-red-800 mb-6 max-w-4xl shadow-sm">
+        <div className="w-full flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-2xl text-sm text-red-800 mb-6 max-w-4xl shadow-sm animate-fade-in">
           <ShieldAlert className="w-5 h-5 text-red-500 shrink-0" />
           <p className="flex-1 font-medium">{error}</p>
           <button onClick={() => setError(null)} className="text-xs text-red-400 hover:text-red-850 font-bold">Tutup</button>
@@ -388,57 +377,112 @@ export default function SeatSelectionPage() {
       <div className="w-full flex flex-col lg:flex-row gap-8 items-start justify-center">
         
         {/* Left Column: Seating Chart Ballroom */}
-        <div className="flex-1 w-full glass-card p-6 rounded-3xl border border-slate-200 bg-white/70 shadow-xl flex flex-col items-center relative overflow-hidden min-h-[460px]">
+        <div className="flex-1 w-full glass-card p-6 rounded-3xl border border-slate-200 bg-white/70 shadow-xl flex flex-col items-center relative min-h-[460px] overflow-hidden">
           
-          {/* Ballroom Zoomed Out: List of Tables */}
-          {!activeTable ? (
-            <div className="w-full flex flex-col items-center">
+          {/* Swipe / Pan Instruction Hint */}
+          <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-6 bg-slate-50 border border-slate-200 px-3 py-1 rounded-full shrink-0">
+            <Move className="w-3.5 h-3.5 text-slate-400" />
+            <span>Geser denah untuk melihat seluruh area ballroom</span>
+          </div>
+
+          <div
+            ref={scrollContainerRef}
+            onMouseDown={handleMouseDown}
+            onMouseLeave={handleMouseLeave}
+            onMouseUp={handleMouseUp}
+            onMouseMove={handleMouseMove}
+            className="w-full overflow-x-auto pb-4 cursor-grab active:cursor-grabbing select-none"
+          >
+            <div className="min-w-[640px] flex flex-col items-center p-2">
               {/* Stage representation */}
-              <div className="w-full max-w-md bg-slate-100 border-2 border-slate-200/80 text-center py-4 rounded-xl mb-12 shadow-sm relative">
+              <div className="w-full max-w-md bg-slate-105 border border-slate-200/80 text-center py-4 rounded-xl mb-12 shadow-sm relative shrink-0">
                 <span className="text-xs font-bold text-slate-700 tracking-[0.3em] uppercase">STAGE / PANGGUNG UTAMA</span>
                 <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-32 h-1 bg-orange-500"></div>
               </div>
 
               {/* Rows and tables layout */}
-              <div className="w-full space-y-8 pb-4">
+              <div className="w-full space-y-12">
                 {rowsAndTables.map((row) => (
-                  <div key={row.row_name} className="space-y-4">
+                  <div key={row.row_name} className="space-y-6">
                     <div className="text-center">
                       <span className={`text-[10px] font-extrabold uppercase tracking-widest px-3 py-1 rounded-full border
-                        ${row.kategori === 'eksekutif' ? 'bg-orange-50 border-orange-200 text-orange-650' : 'bg-indigo-50 border-indigo-200 text-indigo-650'}
+                        ${row.kategori === 'eksekutif' ? 'bg-orange-50 border-orange-200 text-orange-650' : 'bg-indigo-50 border border-indigo-200 text-indigo-650'}
                       `}>
                         {row.row_name} - Kelas {row.kategori.toUpperCase()}
                       </span>
                     </div>
 
-                    <div className="flex flex-wrap justify-center gap-6">
+                    <div className="flex justify-center gap-4">
                       {row.tables.map((table) => {
                         const isEligible = participant.kategori === row.kategori;
-                        const isFull = table.occupied_seats === table.total_seats;
 
                         return (
-                          <button
+                          <div
                             key={table.table_name}
-                            onClick={() => handleTableClick(table.table_name, isEligible)}
-                            className={`
-                              w-24 h-24 rounded-full border flex flex-col items-center justify-center p-2 transition-all relative shadow-sm
-                              ${isEligible 
-                                ? 'bg-white hover:bg-slate-50 border-slate-200 text-slate-800 hover:border-orange-500 hover:shadow-md hover:scale-105 active:scale-95' 
-                                : 'bg-slate-50 border-slate-200 text-slate-400 opacity-40 cursor-not-allowed'
-                              }
+                            id={`table-${table.table_name}`}
+                            className={`relative w-[120px] h-[145px] flex items-center justify-center transition-opacity shrink-0
+                              ${isEligible ? 'opacity-100' : 'opacity-40'}
                             `}
                           >
-                            <Users className={`w-4 h-4 mb-1 ${isEligible ? 'text-orange-500' : 'text-slate-400'}`} />
-                            <span className="text-[10px] font-bold uppercase tracking-wider text-center block w-full truncate">{table.table_name}</span>
-                            <span className={`text-[9px] font-bold font-mono mt-0.5 px-1.5 py-0.5 rounded border
-                              ${isFull 
-                                ? 'bg-red-50 border-red-150 text-red-600' 
-                                : 'bg-slate-50 text-slate-600 border-slate-100'
-                              }
-                            `}>
-                              {table.occupied_seats}/{table.total_seats}
-                            </span>
-                          </button>
+                            {/* The Center Round Table */}
+                            <div className="w-[76px] h-[76px] rounded-full bg-white border-2 border-orange-500 shadow-sm flex flex-col items-center justify-center z-10 select-none">
+                              <span className="text-[10px] font-black text-slate-800 uppercase tracking-wide">{table.table_name}</span>
+                              <span className="text-[9px] text-slate-500 font-bold font-mono">
+                                {table.occupied_seats}/{table.total_seats}
+                              </span>
+                            </div>
+
+                            {/* Radial Seats */}
+                            {table.seat_list.map((seat, index) => {
+                              const status = getSeatStatus(seat.id);
+                              const seatCount = table.total_seats;
+                              const radius = seatCount <= 6 ? 56 : seatCount <= 8 ? 60 : 64;
+                              const angleStart = seatCount <= 6 ? 155 : seatCount <= 8 ? 160 : 165;
+                              const angleEnd = seatCount <= 6 ? 25 : seatCount <= 8 ? 20 : 15;
+                              const angleRange = angleStart - angleEnd;
+                              const angleDeg = seatCount > 1 ? angleStart - (angleRange * index) / (seatCount - 1) : 90;
+                              const angleRad = (angleDeg * Math.PI) / 180;
+                              const x = Math.cos(angleRad) * radius;
+                              const y = Math.sin(angleRad) * radius;
+
+                              const isChairEligible = isEligible;
+                              const isSeatClickable = isChairEligible && status === 'available' && !actionLoading;
+
+                              // Chair size based on seat count
+                              const size = seatCount <= 6 ? 22 : seatCount <= 8 ? 19 : 17;
+
+                              return (
+                                <button
+                                  key={seat.id}
+                                  onClick={() => isSeatClickable && handleSelectSeat(seat)}
+                                  disabled={!isSeatClickable && status !== 'selected'}
+                                  style={{
+                                    transform: `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`,
+                                    left: '50%',
+                                    top: '50%',
+                                    position: 'absolute',
+                                    width: `${size}px`,
+                                    height: `${size}px`,
+                                  }}
+                                  className={`
+                                    rounded-full text-[9px] font-extrabold flex items-center justify-center transition-all z-20 shadow-sm
+                                    ${status === 'available' && isChairEligible && 'bg-white border border-slate-300 text-slate-850 hover:border-orange-500 hover:bg-orange-50 hover:text-orange-600 hover:scale-105'}
+                                    ${status === 'available' && !isChairEligible && 'bg-slate-100 border border-slate-200 text-slate-400 cursor-not-allowed'}
+                                    ${status === 'selected' && 'bg-indigo-600 border border-indigo-400 text-white animate-pulse-ring ring-1 ring-indigo-500/30'}
+                                    ${status === 'locked' && 'bg-yellow-50 border border-yellow-250 text-yellow-600 cursor-not-allowed'}
+                                    ${status === 'booked' && 'bg-red-50 border border-red-200 text-red-500 cursor-not-allowed'}
+                                  `}
+                                  title={`${seat.row_name} - ${seat.table_name} - Kursi ${seat.seat_number}`}
+                                >
+                                  {status === 'booked' ? (
+                                    <Check className="w-2.5 h-2.5" />
+                                  ) : (
+                                    <span>{seat.seat_number}</span>
+                                  )}
+                                </button>
+                              );
+                            })}
+                          </div>
                         );
                       })}
                     </div>
@@ -446,69 +490,7 @@ export default function SeatSelectionPage() {
                 ))}
               </div>
             </div>
-          ) : (
-            /* Zoomed In View: Focused Table Radial Seating Chart */
-            <div className={`w-full flex flex-col items-center transition-all duration-300 transform 
-              ${zoomTransition ? 'scale-100 opacity-100' : 'scale-90 opacity-0'}
-            `}>
-              {/* Back Button */}
-              <button
-                onClick={handleBackToBallroom}
-                className="self-start flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors mb-8 bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-sm hover:bg-slate-50"
-              >
-                <ArrowLeft className="w-4 h-4 text-slate-500" />
-                <span>Kembali ke Denah Ballroom</span>
-              </button>
-
-              <div className="text-center mb-16">
-                <span className="text-[9px] font-bold text-orange-650 uppercase tracking-widest bg-orange-50 px-2.5 py-1 rounded-full border border-orange-200">
-                  Denah Meja Terfokus
-                </span>
-                <h2 className="text-2xl font-black text-slate-900 mt-2 uppercase tracking-wide">{activeTable}</h2>
-                <p className="text-xs text-slate-500 mt-1">Klik salah satu kursi di sekeliling meja untuk mem-booking.</p>
-              </div>
-
-              {/* Radial Seating Round Table representation */}
-              <div className="relative w-72 h-72 flex items-center justify-center mb-12">
-                {/* Center Round Table element */}
-                <div className="w-36 h-36 rounded-full bg-white border-4 border-orange-500 shadow-[0_0_30px_rgba(249,115,22,0.1)] flex flex-col items-center justify-center z-10 select-none">
-                  <span className="text-sm font-black text-slate-950 uppercase tracking-wider">{activeTable}</span>
-                  <span className="text-[10px] text-slate-500 font-bold font-mono mt-1">
-                    {activeTableInfo.filter(s => getSeatStatus(s.id) === 'booked' || (locks.find(l => l.seat_id === s.id) && locks.find(l => l.seat_id === s.id)!.participant_id !== participant.id)).length} / {activeTableInfo.length} Terisi
-                  </span>
-                </div>
-
-                {/* Radial seats buttons */}
-                {activeTableInfo.map((seat, index) => {
-                  const status = getSeatStatus(seat.id);
-                  const isEligible = participant.kategori === seat.kategori;
-                  
-                  return (
-                    <button
-                      key={seat.id}
-                      onClick={() => handleSelectSeat(seat)}
-                      disabled={status === 'booked' || (status === 'locked' && selectedSeatId !== seat.id) || !isEligible || actionLoading}
-                      style={getRadialStyles(index, activeTableInfo.length)}
-                      className={`
-                        w-11 h-11 rounded-full border text-xs font-bold flex items-center justify-center transition-all z-20 shadow-md
-                        ${status === 'available' && 'bg-white border-slate-350 text-slate-800 hover:border-orange-500 hover:bg-orange-50 hover:text-orange-650 hover:shadow-[0_0_12px_rgba(249,115,22,0.15)] hover:scale-105'}
-                        ${status === 'selected' && 'bg-indigo-600 border-indigo-400 text-white animate-pulse-ring ring-2 ring-indigo-500/40'}
-                        ${status === 'locked' && 'bg-yellow-50 border-yellow-250 text-yellow-600 cursor-not-allowed'}
-                        ${status === 'booked' && 'bg-red-50 border-red-200 text-red-500 cursor-not-allowed'}
-                      `}
-                      title={`${seat.id} - Kursi ${seat.seat_number}`}
-                    >
-                      {status === 'booked' ? (
-                        <Check className="w-4 h-4" />
-                      ) : (
-                        <span>{seat.seat_number}</span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+          </div>
 
         </div>
 

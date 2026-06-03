@@ -248,7 +248,7 @@ export default function AdminSeatsPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-3">
-        <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
+        <Loader2 className="w-8 h-8 text-purple-400 animate-spin" />
         <span className="text-slate-600 text-sm">Memuat pengaturan layout...</span>
       </div>
     );
@@ -257,18 +257,18 @@ export default function AdminSeatsPage() {
   return (
     <div className="min-h-screen p-6 max-w-7xl mx-auto flex flex-col gap-8">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center pb-6 border-b border-slate-800 gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center pb-6 border-b border-slate-200 gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="w-2.5 h-2.5 bg-orange-500 rounded-full animate-pulse"></span>
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Portal Admin</span>
+            <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></span>
+            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Portal Admin</span>
           </div>
-          <h1 className="text-2xl font-extrabold text-white">Pengaturan Layout Denah Acara</h1>
+          <h1 className="text-2xl font-extrabold text-slate-900">Pengaturan Layout Denah Acara</h1>
         </div>
 
         <button
           onClick={handleLogout}
-          className="flex items-center gap-2 px-4 py-2.5 bg-slate-900 border border-slate-800 hover:border-red-500/20 hover:text-red-400 text-slate-400 font-semibold rounded-xl text-sm transition-all"
+          className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:border-red-500/20 hover:text-red-500 text-slate-600 font-semibold rounded-xl text-sm transition-all shadow-sm"
         >
           <LogOut className="w-4.5 h-4.5" />
           <span>Keluar Portal</span>
@@ -279,38 +279,38 @@ export default function AdminSeatsPage() {
       <div className="flex flex-wrap gap-3">
         <Link
           href="/admin/participants"
-          className="px-4 py-2 rounded-xl border border-slate-800 bg-slate-950 text-slate-400 hover:text-white text-sm font-semibold transition-all shadow-sm"
+          className="px-4 py-2 rounded-xl border border-slate-200 bg-white text-slate-700 text-sm font-semibold shadow-sm hover:bg-slate-50 hover:border-slate-300 transition-all"
         >
           Daftar Peserta
         </Link>
         <Link
           href="/admin/participants/add"
-          className="px-4 py-2 rounded-xl border border-slate-800 bg-slate-950 text-slate-400 hover:text-white text-sm font-semibold transition-all shadow-sm"
+          className="px-4 py-2 rounded-xl border border-slate-200 bg-white text-slate-700 text-sm font-semibold shadow-sm hover:bg-slate-50 hover:border-slate-300 transition-all"
         >
           Tambah Peserta Manual
         </Link>
         <Link
           href="/admin/seats"
-          className="px-4 py-2 rounded-xl border border-orange-500/30 bg-slate-900 text-white text-sm font-semibold shadow-sm"
+          className="px-4 py-2 rounded-xl border border-slate-200 bg-slate-900 text-white text-sm font-semibold shadow-sm"
         >
-          Pengaturan Denah
+          Kelola Kursi
         </Link>
       </div>
 
       {/* Message Notifications */}
       {error && (
-        <div className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/25 rounded-2xl text-sm text-red-200">
-          <AlertCircle className="w-5 h-5 text-red-400 shrink-0" />
-          <p className="flex-1">{error}</p>
-          <button onClick={() => setError(null)} className="text-xs text-slate-400 font-bold hover:text-white">Tutup</button>
+        <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-2xl text-sm text-red-800 shadow-sm animate-fade-in">
+          <AlertCircle className="w-5 h-5 text-red-500 shrink-0" />
+          <p className="flex-1 font-medium">{error}</p>
+          <button onClick={() => setError(null)} className="text-xs text-red-400 font-bold hover:text-red-850">Tutup</button>
         </div>
       )}
 
       {successMsg && (
-        <div className="flex items-center gap-3 p-4 bg-emerald-500/10 border border-emerald-500/25 rounded-2xl text-sm text-emerald-200">
-          <CheckCircle className="w-5 h-5 text-emerald-400 shrink-0" />
-          <p className="flex-1">{successMsg}</p>
-          <button onClick={() => setSuccessMsg(null)} className="text-xs text-slate-400 font-bold hover:text-white">Tutup</button>
+        <div className="flex items-center gap-3 p-4 bg-emerald-50 border border-emerald-250 rounded-2xl text-sm text-emerald-800 shadow-sm animate-fade-in">
+          <CheckCircle className="w-5 h-5 text-emerald-500 shrink-0" />
+          <p className="flex-1 font-medium">{successMsg}</p>
+          <button onClick={() => setSuccessMsg(null)} className="text-xs text-emerald-400 font-bold hover:text-emerald-850">Tutup</button>
         </div>
       )}
 
@@ -320,19 +320,19 @@ export default function AdminSeatsPage() {
         {/* Left Column: Seating Layout Draft Configurator */}
         <div className="space-y-6">
           {/* Add Row Form Card */}
-          <div className="glass-card p-6 rounded-3xl border border-slate-800 shadow-xl space-y-4">
-            <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
-              <Plus className="w-5 h-5 text-orange-400" />
-              <h2 className="text-md font-bold text-white">Tambah Baris & Meja Baru</h2>
+          <div className="glass-card p-6 rounded-3xl border border-slate-200 shadow-xl space-y-4">
+            <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
+              <Plus className="w-5 h-5 text-orange-500" />
+              <h2 className="text-md font-bold text-slate-900">Tambah Baris & Meja Baru</h2>
             </div>
             
             <form onSubmit={handleAddRowConfig} className="grid grid-cols-1 sm:grid-cols-4 gap-4 items-end">
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Kategori</label>
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-700">Kategori</label>
                 <select
                   value={newKategori}
                   onChange={(e) => setNewKategori(e.target.value as 'eksekutif' | 'bisnis')}
-                  className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white text-xs focus:outline-none focus:border-orange-500"
+                  className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 shadow-sm"
                 >
                   <option value="eksekutif">Eksekutif</option>
                   <option value="bisnis">Bisnis</option>
@@ -340,43 +340,43 @@ export default function AdminSeatsPage() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Nama Baris</label>
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-700">Nama Baris</label>
                 <input
                   type="text"
                   value={newRowName}
                   onChange={(e) => setNewRowName(e.target.value)}
                   placeholder="Contoh: Baris 4"
-                  className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white text-xs focus:outline-none focus:border-orange-500"
+                  className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 shadow-sm"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Jumlah Meja</label>
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-700">Jumlah Meja</label>
                 <input
                   type="number"
                   min="1"
                   max="15"
                   value={newTablesCount}
                   onChange={(e) => setNewTablesCount(Number(e.target.value))}
-                  className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white text-xs focus:outline-none focus:border-orange-500"
+                  className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 shadow-sm"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Kursi per Meja</label>
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-700">Kursi per Meja</label>
                 <input
                   type="number"
                   min="1"
                   max="12"
                   value={defaultSeatsPerTable}
                   onChange={(e) => setDefaultSeatsPerTable(Number(e.target.value))}
-                  className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white text-xs focus:outline-none focus:border-orange-500"
+                  className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 shadow-sm"
                 />
               </div>
 
               <button
                 type="submit"
-                className="w-full sm:col-span-4 py-2.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-white font-semibold rounded-lg text-xs transition-all shadow"
+                className="w-full sm:col-span-4 py-2.5 bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 text-slate-700 font-semibold rounded-xl text-xs transition-all shadow-sm"
               >
                 + Tambah Baris ke Draft
               </button>
@@ -384,13 +384,13 @@ export default function AdminSeatsPage() {
           </div>
 
           {/* Draft Visual Configurator */}
-          <div className="glass-card p-6 rounded-3xl border border-slate-800 shadow-xl space-y-6">
-            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+          <div className="glass-card p-6 rounded-3xl border border-slate-200 shadow-xl space-y-6">
+            <div className="flex justify-between items-center border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2">
-                <LayoutGrid className="w-5 h-5 text-orange-400" />
-                <h2 className="text-md font-bold text-white">Draft Layout Meja & Kursi</h2>
+                <LayoutGrid className="w-5 h-5 text-orange-500" />
+                <h2 className="text-md font-bold text-slate-900">Draft Layout Meja & Kursi</h2>
               </div>
-              <span className="text-[10px] text-slate-400">
+              <span className="text-[10px] text-slate-500">
                 Draft: <strong>{draftStats.tablesCount} Meja</strong>, <strong>{draftStats.seatsCount} Kursi</strong>
               </span>
             </div>
@@ -400,22 +400,22 @@ export default function AdminSeatsPage() {
             ) : (
               <div className="space-y-6">
                 {layoutConfig.map((row, rIdx) => (
-                  <div key={rIdx} className="bg-slate-900/40 border border-slate-900 rounded-2xl p-4 space-y-4">
+                  <div key={rIdx} className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-4">
                     {/* Row Header */}
                     <div className="flex justify-between items-center">
                       <div className="flex items-center gap-3">
-                        <span className="text-xs font-bold text-white bg-slate-950 px-3 py-1 rounded-md border border-slate-800">
+                        <span className="text-xs font-bold text-slate-900 bg-white px-3 py-1 rounded-md border border-slate-200">
                           {row.row_name}
                         </span>
                         <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border
-                          ${row.kategori === 'eksekutif' ? 'bg-orange-500/10 border-orange-500/25 text-orange-400' : 'bg-indigo-500/10 border-indigo-500/25 text-indigo-400'}
+                          ${row.kategori === 'eksekutif' ? 'bg-orange-50 border-orange-200 text-orange-600' : 'bg-indigo-50 border border-indigo-200 text-indigo-600'}
                         `}>
                           {row.kategori}
                         </span>
                       </div>
                       <button
                         onClick={() => handleDeleteRowConfig(rIdx)}
-                        className="text-xs text-slate-500 hover:text-red-400 flex items-center gap-1.5 transition-colors"
+                        className="text-xs text-slate-500 hover:text-red-500 flex items-center gap-1.5 transition-colors"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                         <span>Hapus Baris</span>
@@ -425,28 +425,28 @@ export default function AdminSeatsPage() {
                     {/* Tables grid configurator */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                       {row.tables.map((table, tIdx) => (
-                        <div key={tIdx} className="bg-slate-950/60 border border-slate-800/80 p-3 rounded-xl space-y-2.5">
+                        <div key={tIdx} className="bg-white border border-slate-200 p-3 rounded-xl space-y-2.5 animate-fade-in">
                           {/* Table Name */}
                           <div className="space-y-1">
-                            <span className="text-[9px] uppercase tracking-wider text-slate-500 font-bold">Nama Meja</span>
+                            <span className="text-[9px] uppercase tracking-wider text-slate-400 font-bold">Nama Meja</span>
                             <input
                               type="text"
                               value={table.table_name}
                               onChange={(e) => handleTableNameChange(rIdx, tIdx, e.target.value)}
-                              className="w-full px-2 py-1 bg-slate-900 border border-slate-800 rounded text-white text-xs font-bold"
+                              className="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded text-slate-900 text-xs font-bold focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
                             />
                           </div>
 
                           {/* Table Seats Count */}
                           <div className="space-y-1">
-                            <span className="text-[9px] uppercase tracking-wider text-slate-500 font-bold">Jumlah Kursi</span>
+                            <span className="text-[9px] uppercase tracking-wider text-slate-400 font-bold">Jumlah Kursi</span>
                             <input
                               type="number"
                               min="1"
                               max="12"
                               value={table.seats_count}
                               onChange={(e) => handleTableSeatsChange(rIdx, tIdx, Number(e.target.value))}
-                              className="w-full px-2 py-1 bg-slate-900 border border-slate-800 rounded text-white text-xs font-mono font-bold"
+                              className="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded text-slate-900 text-xs font-mono font-bold focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
                             />
                           </div>
                         </div>
@@ -462,25 +462,25 @@ export default function AdminSeatsPage() {
         {/* Right Column: Active Seating Summary & Saving trigger */}
         <div className="space-y-6">
           {/* Apply Card */}
-          <div className="glass-card p-6 rounded-3xl border border-slate-800 shadow-xl space-y-4 relative overflow-hidden">
+          <div className="glass-card p-6 rounded-3xl border border-slate-200 shadow-xl space-y-4 relative overflow-hidden">
             {/* Border glow */}
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-orange-500 to-amber-500"></div>
 
-            <h3 className="text-sm font-bold text-white uppercase tracking-wider">Simpan Layout</h3>
+            <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Simpan Layout</h3>
             
-            <div className="space-y-3 py-2 border-y border-slate-800 text-xs">
+            <div className="space-y-3 py-2 border-y border-slate-100 text-xs">
               <div className="flex justify-between">
-                <span className="text-slate-400">Total Meja Baru</span>
-                <span className="font-bold text-white">{draftStats.tablesCount} Meja</span>
+                <span className="text-slate-500">Total Meja Baru</span>
+                <span className="font-bold text-slate-900">{draftStats.tablesCount} Meja</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400">Total Kursi Baru</span>
-                <span className="font-bold text-orange-400">{draftStats.seatsCount} Kursi</span>
+                <span className="text-slate-500">Total Kursi Baru</span>
+                <span className="font-bold text-orange-600">{draftStats.seatsCount} Kursi</span>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 p-3 bg-red-500/10 border border-red-500/25 rounded-xl text-red-200 text-[10px] leading-relaxed">
-              <AlertTriangle className="w-5 h-5 text-red-400 shrink-0" />
+            <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-xl text-red-800 text-[10px] leading-relaxed shadow-sm">
+              <AlertTriangle className="w-5 h-5 text-red-500 shrink-0" />
               <span>
                 <strong>PERINGATAN:</strong> Menyimpan layout baru akan <strong>MENGHAPUS</strong> seluruh data meja/kursi aktif saat ini dan <strong>MEMBATALKAN</strong> check-in / booking semua peserta yang ada!
               </span>
@@ -497,18 +497,18 @@ export default function AdminSeatsPage() {
           </div>
 
           {/* Active Seating Layout Display */}
-          <div className="glass-card p-6 rounded-3xl border border-slate-800 shadow-xl space-y-4">
-            <h3 className="text-sm font-bold text-white uppercase tracking-wider border-b border-slate-800 pb-3">Layout Aktif (Database)</h3>
+          <div className="glass-card p-6 rounded-3xl border border-slate-200 shadow-xl space-y-4">
+            <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider border-b border-slate-100 pb-3">Layout Aktif (Database)</h3>
             
-            <div className="flex gap-4 text-xs bg-slate-950 p-3 rounded-2xl border border-slate-900/60 justify-around text-center">
+            <div className="flex gap-4 text-xs bg-slate-50 p-3 rounded-2xl border border-slate-200 justify-around text-center">
               <div>
                 <span className="text-[10px] text-slate-500 uppercase block">Total Meja</span>
-                <span className="text-sm font-bold text-white">{activeStats.tablesCount}</span>
+                <span className="text-sm font-bold text-slate-900">{activeStats.tablesCount}</span>
               </div>
-              <div className="w-px bg-slate-800"></div>
+              <div className="w-px bg-slate-200"></div>
               <div>
                 <span className="text-[10px] text-slate-500 uppercase block">Total Kursi</span>
-                <span className="text-sm font-bold text-orange-400">{activeStats.seatsCount}</span>
+                <span className="text-sm font-bold text-orange-600">{activeStats.seatsCount}</span>
               </div>
             </div>
 
@@ -517,13 +517,13 @@ export default function AdminSeatsPage() {
             ) : (
               <div className="space-y-4 max-h-[300px] overflow-y-auto pr-1">
                 {Array.from(groupedActiveSeats.entries()).map(([rowName, rowMap]) => (
-                  <div key={rowName} className="space-y-2 border-b border-slate-900 pb-3 last:border-0 last:pb-0">
-                    <span className="text-[10px] font-bold text-slate-400 bg-slate-900 px-2 py-0.5 rounded">{rowName}</span>
+                  <div key={rowName} className="space-y-2 border-b border-slate-100 pb-3 last:border-0 last:pb-0">
+                    <span className="text-[10px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded">{rowName}</span>
                     <div className="grid grid-cols-2 gap-2 mt-1">
                       {Array.from(rowMap.entries()).map(([tableName, seatList]) => (
-                        <div key={tableName} className="bg-slate-900/40 p-2 rounded-lg flex justify-between items-center border border-slate-900">
-                          <span className="text-xs font-semibold text-slate-300">{tableName}</span>
-                          <span className="text-[10px] font-bold bg-slate-950 px-2 py-0.5 rounded text-orange-400 border border-slate-800">
+                        <div key={tableName} className="bg-slate-50 p-2 rounded-lg flex justify-between items-center border border-slate-200">
+                          <span className="text-xs font-semibold text-slate-700">{tableName}</span>
+                          <span className="text-[10px] font-bold bg-white px-2 py-0.5 rounded text-orange-600 border border-slate-200">
                             {seatList.length} Kursi
                           </span>
                         </div>
@@ -540,24 +540,24 @@ export default function AdminSeatsPage() {
 
       {/* Confirmation Reset Warning Modal */}
       {showConfirmResetModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-3xl bg-slate-950 border border-slate-800 shadow-2xl overflow-hidden relative p-6 space-y-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm animate-fade-in">
+          <div className="w-full max-w-md rounded-3xl bg-white border border-slate-200 shadow-2xl overflow-hidden relative p-6 space-y-6">
             <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-red-500/10 border border-red-500/25 flex items-center justify-center shrink-0">
+              <div className="w-12 h-12 rounded-2xl bg-red-50 border border-red-100 flex items-center justify-center shrink-0">
                 <AlertTriangle className="w-6 h-6 text-red-500" />
               </div>
               <div className="space-y-1">
-                <h3 className="text-lg font-bold text-white">Terapkan Layout Baru?</h3>
-                <p className="text-xs text-slate-400 leading-normal">
+                <h3 className="text-lg font-bold text-slate-900">Terapkan Layout Baru?</h3>
+                <p className="text-xs text-slate-500 leading-normal">
                   Tindakan ini akan mengosongkan data kursi yang lama, menghapus semua database check-in, dan membatalkan pesanan kursi dari semua peserta.
                 </p>
               </div>
             </div>
 
-            <div className="flex gap-3 justify-end pt-3 border-t border-slate-900">
+            <div className="flex gap-3 justify-end pt-3 border-t border-slate-200">
               <button
                 onClick={() => setShowConfirmResetModal(false)}
-                className="px-4 py-2 rounded-xl border border-slate-800 bg-slate-900 text-slate-300 hover:text-white text-xs font-semibold"
+                className="px-4 py-2 rounded-xl border border-slate-200 bg-white text-slate-650 hover:text-slate-900 text-xs font-semibold"
               >
                 Batal
               </button>
