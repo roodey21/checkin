@@ -468,9 +468,9 @@ export default function SeatSelectionPage() {
                                     rounded-full text-[9px] font-extrabold flex items-center justify-center transition-all z-20 shadow-sm
                                     ${status === 'available' && isChairEligible && 'bg-white border border-slate-300 text-slate-850 hover:border-orange-500 hover:bg-orange-50 hover:text-orange-600 hover:scale-105'}
                                     ${status === 'available' && !isChairEligible && 'bg-slate-100 border border-slate-200 text-slate-400 cursor-not-allowed'}
-                                    ${status === 'selected' && 'bg-indigo-600 border border-indigo-400 text-white animate-pulse-ring ring-1 ring-indigo-500/30'}
-                                    ${status === 'locked' && 'bg-yellow-50 border border-yellow-250 text-yellow-600 cursor-not-allowed'}
-                                    ${status === 'booked' && 'bg-red-50 border border-red-200 text-red-500 cursor-not-allowed'}
+                                    ${status === 'selected' && 'bg-blue-600 border border-blue-400 text-white animate-pulse-ring ring-1 ring-blue-500/30'}
+                                    ${status === 'locked' && 'bg-amber-500 border border-amber-600 text-white cursor-not-allowed'}
+                                    ${status === 'booked' && 'bg-red-600 border border-red-700 text-white cursor-not-allowed'}
                                   `}
                                   title={`${seat.row_name} - ${seat.table_name} - Kursi ${seat.seat_number}`}
                                 >
@@ -505,15 +505,15 @@ export default function SeatSelectionPage() {
                 <span className="text-slate-700 font-semibold">Tersedia</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded-full bg-indigo-600 border border-indigo-400"></div>
+                <div className="w-4 h-4 rounded-full bg-blue-600 border border-blue-400"></div>
                 <span className="text-slate-700 font-semibold">Pilihan Anda</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded-full bg-yellow-50 border border-yellow-250"></div>
+                <div className="w-4 h-4 rounded-full bg-amber-500 border border-amber-600"></div>
                 <span className="text-slate-700 font-semibold">Sedang Dikunci</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded-full bg-red-50 border border-red-200"></div>
+                <div className="w-4 h-4 rounded-full bg-red-600 border border-red-700"></div>
                 <span className="text-slate-700 font-semibold">Sudah Terisi</span>
               </div>
             </div>
@@ -537,7 +537,7 @@ export default function SeatSelectionPage() {
               </div>
               <div className="flex justify-between flex-wrap gap-2">
                 <span className="text-slate-500">Kursi Dipilih</span>
-                <span className="font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">
+                <span className="font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-100">
                   {selectedSeatId ? (
                     (() => {
                       const matched = seats.find(s => s.id === selectedSeatId);

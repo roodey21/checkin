@@ -99,16 +99,16 @@ html.theme-dark .glass-card-hover:hover {
 /* Animations */
 @keyframes pulse-ring {
   0% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.7);
+    scale: 0.95;
+    box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7);
   }
   70% {
-    transform: scale(1);
-    box-shadow: 0 0 0 10px rgba(56, 189, 248, 0);
+    scale: 1;
+    box-shadow: 0 0 0 10px rgba(37, 99, 235, 0);
   }
   100% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(56, 189, 248, 0);
+    scale: 0.95;
+    box-shadow: 0 0 0 0 rgba(37, 99, 235, 0);
   }
 }
 
