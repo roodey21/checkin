@@ -131,14 +131,20 @@ export default function CheckInPage() {
     <div className="min-h-screen flex flex-col items-center justify-center p-4">
       {/* Logos Header */}
       <div className="w-full max-w-md flex justify-between items-center px-4 mb-6">
-        <div className="flex flex-col">
-          <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider leading-none">Danantara</span>
-          <span className="text-[9px] font-extrabold text-slate-900 uppercase tracking-widest leading-none mt-1">Indonesia</span>
-        </div>
-        <div className="flex flex-col text-right">
+        <img
+          src="/logo-danantara-indonesia.png"
+          alt="Danantara Indonesia"
+          className="h-8 object-contain"
+        />
+        <img
+          src="/logo-perkebunan-nusantara.png"
+          alt="PTPN Group"
+          className="h-8 object-contain"
+        />
+        {/* <div className="flex flex-col text-right">
           <span className="text-[9px] font-bold text-emerald-400 uppercase tracking-wider leading-none">Perkebunan</span>
           <span className="text-[9px] font-extrabold text-slate-700 uppercase tracking-widest leading-none mt-1">Nusantara</span>
-        </div>
+        </div> */}
       </div>
 
       <div className="text-center mb-8 max-w-md flex flex-col items-center">
@@ -150,8 +156,8 @@ export default function CheckInPage() {
           Navigating The New Era of Financial Excellence
         </div>
         <div className="mt-4 flex flex-wrap justify-center gap-2 text-[9px] text-slate-500">
-          <span className="bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-full">📅 11-12 Juni 2026</span>
-          <span className="bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-full">📍 PT. LPP Agro Nusantara</span>
+          <span className="bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-full">📅 Juni 11-12 2026</span>
+          <span className="bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-full">📍 Yogyakarta</span>
         </div>
       </div>
 

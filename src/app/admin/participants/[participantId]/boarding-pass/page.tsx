@@ -211,12 +211,11 @@ export default function AdminParticipantBoardingPassPage() {
             <div className="absolute -top-3 -left-3 w-6 h-6 bg-slate-50 rounded-full border border-slate-300 no-print z-20"></div>
 
             {/* Watermark Logo in Blue */}
-            <div className="absolute inset-0 pointer-events-none select-none z-0 flex items-center justify-center overflow-hidden opacity-[0.10]">
+            <div className="absolute inset-0 pointer-events-none select-none z-0 flex items-center justify-center overflow-hidden opacity-85">
               <img 
-                src="/vector-logo.png" 
+                src="/aset-logo.png" 
                 alt="Watermark Logo" 
                 className="w-[85%] h-auto object-contain"
-                style={{ filter: 'brightness(0) saturate(100%) invert(14%) sepia(45%) saturate(3000%) hue-rotate(215deg) brightness(95%) contrast(93%)' }}
               />
             </div>
 
