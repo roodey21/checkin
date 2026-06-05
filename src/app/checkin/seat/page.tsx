@@ -34,7 +34,7 @@ interface Lock {
 export default function SeatSelectionPage() {
   const router = useRouter();
   const { participant, selectedSeatId, lockExpiresAt, setSelectedSeat, logout, loading: sessionLoading } = useCheckIn();
-  
+
   const [seats, setSeats] = useState<Seat[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [locks, setLocks] = useState<Lock[]>([]);
@@ -133,11 +133,11 @@ export default function SeatSelectionPage() {
   useEffect(() => {
     if (lockExpiresAt && selectedSeatId) {
       const expiry = new Date(lockExpiresAt).getTime();
-      
+
       const updateTimer = () => {
         const now = Date.now();
         const diff = Math.max(0, Math.floor((expiry - now) / 1000));
-        
+
         setTimeLeft(diff);
 
         if (diff === 0) {
@@ -269,15 +269,15 @@ export default function SeatSelectionPage() {
     }[] = [];
 
     const rowNames = Array.from(new Set(seats.map(s => s.row_name)));
-    
+
     rowNames.forEach(rowName => {
       const rowSeats = seats.filter(s => s.row_name === rowName);
       const kategori = rowSeats[0]?.kategori || 'bisnis';
       const tableNames = Array.from(new Set(rowSeats.map(s => s.table_name)));
-      
+
       const tables = tableNames.map(tableName => {
         const tableSeats = rowSeats.filter(s => s.table_name === tableName);
-        
+
         let occupied = 0;
         tableSeats.forEach(seat => {
           const isBooked = bookings.some(b => b.seat_id === seat.id);
@@ -331,6 +331,15 @@ export default function SeatSelectionPage() {
 
   return (
     <div className="min-h-screen py-8 px-4 flex flex-col items-center justify-start max-w-6xl mx-auto">
+      {/* Banner Event */}
+      <div className="w-full mb-6 overflow-hidden rounded-3xl border border-slate-200 shadow-md">
+        <img
+          src="/banner-event.png"
+          alt="PTPN Finance & Risk Leaders Forum 2026 Banner"
+          className="w-full h-auto object-cover block"
+        />
+      </div>
+
       {/* Header */}
       <div className="w-full flex flex-col md:flex-row justify-between items-center mb-8 gap-4 pb-6 border-b border-slate-200">
         <div className="flex items-center gap-3">
@@ -375,10 +384,10 @@ export default function SeatSelectionPage() {
 
       {/* Main Grid split */}
       <div className="w-full flex flex-col lg:flex-row gap-8 items-start justify-center">
-        
+
         {/* Left Column: Seating Chart Ballroom */}
         <div className="flex-1 w-full glass-card p-6 rounded-3xl border border-slate-200 bg-white/70 shadow-xl flex flex-col items-center relative min-h-[460px] overflow-hidden">
-          
+
           {/* Swipe / Pan Instruction Hint */}
           <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-6 bg-slate-50 border border-slate-200 px-3 py-1 rounded-full shrink-0">
             <Move className="w-3.5 h-3.5 text-slate-400" />
@@ -413,6 +422,15 @@ export default function SeatSelectionPage() {
                     </div>
 
                     <div className="flex justify-center gap-4">
+                      {/* Left Entrance Box */}
+                      {row.row_name.toUpperCase() === 'BARIS 2' && (
+                        <div className="w-8 h-[145px] border-2 border-dashed border-slate-250 rounded-xl bg-slate-50/60 flex items-center justify-center shadow-inner shrink-0">
+                          <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest [writing-mode:vertical-lr] rotate-180">
+                            Pintu Masuk
+                          </span>
+                        </div>
+                      )}
+
                       {row.tables.map((table) => {
                         const isEligible = participant.kategori === row.kategori;
 
@@ -485,6 +503,11 @@ export default function SeatSelectionPage() {
                           </div>
                         );
                       })}
+
+                      {/* Right Entrance Box Spacer to keep tables centered */}
+                      {row.row_name.toUpperCase() === 'BARIS 2' && (
+                        <div className="w-8 h-[145px] shrink-0 pointer-events-none" />
+                      )}
                     </div>
                   </div>
                 ))}
@@ -498,7 +521,7 @@ export default function SeatSelectionPage() {
         <div className="w-full lg:w-80 space-y-6">
           {/* Status Legends */}
           <div className="glass-card p-5 rounded-2xl border border-slate-200 bg-white/70 shadow-sm">
-            <h3 className="text-sm font-bold text-slate-900 mb-4">Legenda Status</h3>
+            <h3 className="text-sm font-bold text-slate-900 mb-4">Informasi Status</h3>
             <div className="grid grid-cols-2 gap-3 text-xs">
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 rounded-full bg-white border border-slate-300"></div>
@@ -525,7 +548,7 @@ export default function SeatSelectionPage() {
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-orange-500 to-amber-500"></div>
 
             <h3 className="text-sm font-bold text-slate-900">Ringkasan Check-in</h3>
-            
+
             <div className="space-y-3 py-2 border-y border-slate-100 text-sm">
               <div className="flex justify-between">
                 <span className="text-slate-500">Nama</span>
