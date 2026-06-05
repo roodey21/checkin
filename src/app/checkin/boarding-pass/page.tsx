@@ -9,9 +9,9 @@ const formatSeatId = (id: string) => {
   if (!id) return '';
   const parts = id.split('-');
   if (parts.length >= 4) {
-    const table = parts[2].replace('Meja', 'Meja ');
+    const table = parts[2].replace(/[T|Meja\s]/g, '');
     const seat = parts[3].replace('S', '');
-    return `${table} - Kursi ${seat}`;
+    return `${table}-${seat}`;
   }
   return id;
 };
@@ -42,7 +42,7 @@ export default function BoardingPassPage() {
     setDownloading('jpg');
     const html2canvas = (await import('html2canvas')).default;
     const element = document.getElementById('boarding-pass-ticket');
-    
+
     if (!element) {
       setDownloading(null);
       return;
@@ -72,7 +72,7 @@ export default function BoardingPassPage() {
     const html2canvas = (await import('html2canvas')).default;
     const { jsPDF } = await import('jspdf');
     const element = document.getElementById('boarding-pass-ticket');
-    
+
     if (!element) {
       setDownloading(null);
       return;
@@ -85,7 +85,7 @@ export default function BoardingPassPage() {
         backgroundColor: '#f8fafc'
       });
       const imgData = canvas.toDataURL('image/jpeg', 0.95);
-      
+
       // Compute width and height of canvas for landscape orientation
       const pdf = new jsPDF({
         orientation: 'landscape',
@@ -133,132 +133,152 @@ export default function BoardingPassPage() {
       <div className="w-full overflow-x-auto pb-6 flex justify-center print-area">
         <div
           id="boarding-pass-ticket"
-          className="w-[780px] h-[260px] bg-white rounded-3xl border border-slate-200 shadow-2xl flex overflow-hidden shrink-0 relative"
+          className="w-[780px] h-[290px] bg-white rounded-3xl border border-slate-300 shadow-2xl flex overflow-hidden shrink-0 relative"
           style={{ fontFamily: 'sans-serif' }}
         >
-          {/* Accent decoration */}
-          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-orange-500 to-amber-500"></div>
-
           {/* LEFT: MAIN PASSENGER BOARDING CARD (70%) */}
-          <div className="w-[70%] p-6 flex flex-col justify-between relative border-r border-dashed border-slate-200">
+          <div className="w-[70%] p-6 flex flex-col justify-between relative border-r-2 border-dotted border-slate-300 overflow-hidden bg-white">
             {/* Corner cutouts for ticket aesthetic */}
-            <div className="absolute -bottom-3 -right-3 w-6 h-6 bg-slate-50 rounded-full border border-slate-200 no-print"></div>
-            <div className="absolute -top-3 -right-3 w-6 h-6 bg-slate-50 rounded-full border border-slate-200 no-print"></div>
+            <div className="absolute -bottom-3 -right-3 w-6 h-6 bg-slate-50 rounded-full border border-slate-300 no-print z-20"></div>
+            <div className="absolute -top-3 -right-3 w-6 h-6 bg-slate-50 rounded-full border border-slate-300 no-print z-20"></div>
+
+            {/* Background World Map with whitespace padding */}
+            <div className="absolute inset-0 pointer-events-none select-none z-0 p-4">
+              <img
+                src="/aset-peta.png"
+                alt="Background Map"
+                className="w-full h-full object-contain opacity-85"
+              />
+            </div>
 
             {/* Header info */}
-            <div className="flex justify-between items-start">
-              <div>
-                <span className="text-[10px] font-bold text-orange-400 uppercase tracking-widest">
-                  Official Boarding Pass
-                </span>
-                <h2 className="text-sm font-extrabold text-slate-900 uppercase tracking-wider mt-0.5">
-                  PTPN FINANCE & RISK LEADERS FORUM 2026
-                </h2>
-              </div>
-              <Plane className="w-5 h-5 text-orange-400 rotate-45" />
+            <div className="flex items-center relative z-10">
+              <img
+                src="/ptpn-airlines.png"
+                alt="PTPN Airlines Logo"
+                className="h-[18px] object-contain"
+              />
+              <div className="w-[1.5px] h-6 bg-[#1a2c5b]/30 mx-3"></div>
+              <span className="font-sans text-xs font-bold text-[#1b2a57] tracking-wider uppercase">
+                {participant.kategori === 'eksekutif' ? 'Executive Class' : 'Business Class'}
+              </span>
+            </div>
+
+            {/* Center flight route graphic */}
+            <div className="flex justify-center my-2 relative z-10">
+              <img
+                src="/aset-psn-ftr.png"
+                alt="PSN - FTR"
+                className="h-[52px] object-contain"
+              />
             </div>
 
             {/* Middle passenger info */}
-            <div className="grid grid-cols-2 gap-y-4 gap-x-2 mt-4">
-              <div>
-                <span className="block text-[9px] uppercase tracking-wider text-slate-500">NAMA PESERTA</span>
-                <span className="text-sm font-bold text-slate-900 uppercase line-clamp-1">{participant.nama}</span>
-              </div>
-              <div>
-                <span className="block text-[9px] uppercase tracking-wider text-slate-500">KATEGORI KELAS</span>
-                <span className="text-sm font-extrabold text-orange-400 uppercase tracking-wide">
-                  {participant.kategori}
-                </span>
-              </div>
-              <div>
-                <span className="block text-[9px] uppercase tracking-wider text-slate-500">KODE BOOKING</span>
-                <span className="text-sm font-bold text-slate-900 font-mono tracking-wider">{participant.booking_code}</span>
-              </div>
-              <div className="flex gap-4">
-                <div>
-                  <span className="block text-[9px] uppercase tracking-wider text-slate-500">TANGGAL</span>
-                  <span className="text-xs font-semibold text-slate-700">11-12 Juni 2026</span>
-                </div>
-                <div>
-                  <span className="block text-[9px] uppercase tracking-wider text-slate-500">SEAT</span>
-                  <span className="text-xs font-semibold text-slate-700">{formatSeatId(selectedSeatId)}</span>
+            <div className="grid grid-cols-2 gap-y-3 gap-x-6 relative z-10 px-2 mt-2">
+              <div className="flex flex-col">
+                <div className="text-[10px] font-serif lining-nums text-slate-500 tracking-wide leading-normal" style={{ fontFamily: '"Times New Roman", Times, serif' }}>Name</div>
+                <div className="text-sm font-serif lining-nums font-bold text-[#1a2c5b] mt-0.5 truncate uppercase leading-normal pb-0.5" style={{ fontFamily: '"Times New Roman", Times, serif' }}>
+                  {participant.nama}
                 </div>
               </div>
-            </div>
-
-            {/* Footer Barcode / Info */}
-            <div className="flex justify-between items-end mt-4 pt-3 border-t border-slate-200">
-              <div className="flex items-center gap-4 text-[10px] text-slate-400">
-                <div className="flex items-center gap-1">
-                  <Calendar className="w-3 h-3 text-slate-500" />
-                  <span>08:00 - 17:00 WIB</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <MapPin className="w-3 h-3 text-slate-500" />
-                  <span>PT. LPP Agro Nusantara</span>
+              <div className="flex flex-col">
+                <div className="text-[10px] font-serif lining-nums text-slate-500 tracking-wide leading-normal" style={{ fontFamily: '"Times New Roman", Times, serif' }}>Booking Number</div>
+                <div className="text-sm font-serif lining-nums font-bold text-[#1a2c5b] mt-0.5 uppercase leading-normal pb-0.5" style={{ fontFamily: '"Times New Roman", Times, serif' }}>
+                  {participant.booking_code}
                 </div>
               </div>
-
-              {/* Pseudo Barcode */}
-              <div className="flex flex-col items-center">
-                <div className="h-6 flex items-end gap-[1.5px] opacity-75">
-                  <div className="w-[1px] h-full bg-slate-400"></div>
-                  <div className="w-[2px] h-full bg-slate-400"></div>
-                  <div className="w-[1px] h-full bg-slate-400"></div>
-                  <div className="w-[3px] h-full bg-slate-400"></div>
-                  <div className="w-[1px] h-full bg-slate-400"></div>
-                  <div className="w-[2px] h-full bg-slate-400"></div>
-                  <div className="w-[1px] h-full bg-slate-400"></div>
-                  <div className="w-[4px] h-full bg-slate-400"></div>
-                  <div className="w-[1px] h-full bg-slate-400"></div>
-                  <div className="w-[2px] h-full bg-slate-400"></div>
-                  <div className="w-[1px] h-full bg-slate-400"></div>
-                  <div className="w-[3px] h-full bg-slate-400"></div>
-                  <div className="w-[1px] h-full bg-slate-400"></div>
-                  <div className="w-[2px] h-full bg-slate-400"></div>
-                  <div className="w-[1px] h-full bg-slate-400"></div>
-                  <div className="w-[4px] h-full bg-slate-400"></div>
+              <div className="flex flex-col">
+                <div className="text-[10px] font-serif lining-nums text-slate-500 tracking-wide leading-normal" style={{ fontFamily: '"Times New Roman", Times, serif' }}>Date</div>
+                <div className="text-sm font-serif lining-nums font-bold text-[#1a2c5b] mt-0.5 leading-normal pb-0.5" style={{ fontFamily: '"Times New Roman", Times, serif' }}>
+                  11 - 12 Juni 2026
                 </div>
-                <span className="text-[7px] text-slate-600 font-mono tracking-widest mt-1">PTPN2026FRL</span>
+              </div>
+              <div className="flex flex-col">
+                <div className="text-[10px] font-serif lining-nums text-slate-500 tracking-wide leading-normal" style={{ fontFamily: '"Times New Roman", Times, serif' }}>Gate</div>
+                <div className="text-sm font-serif lining-nums font-bold text-[#1a2c5b] mt-0.5 leading-normal pb-0.5" style={{ fontFamily: '"Times New Roman", Times, serif' }}>
+                  A1
+                </div>
+              </div>
+              <div className="flex flex-col">
+                <div className="text-[10px] font-serif lining-nums text-slate-500 tracking-wide leading-normal" style={{ fontFamily: '"Times New Roman", Times, serif' }}>Boarding</div>
+                <div className="text-sm font-serif lining-nums font-bold text-[#1a2c5b] mt-0.5 leading-normal pb-0.5" style={{ fontFamily: '"Times New Roman", Times, serif' }}>
+                  08.00 WIB
+                </div>
+              </div>
+              <div className="flex flex-col">
+                <div className="text-[10px] font-serif lining-nums text-slate-500 tracking-wide leading-normal" style={{ fontFamily: '"Times New Roman", Times, serif' }}>Seat</div>
+                <div className="text-sm font-serif lining-nums font-bold text-[#1a2c5b] mt-0.5 uppercase leading-normal pb-0.5" style={{ fontFamily: '"Times New Roman", Times, serif' }}>
+                  {formatSeatId(selectedSeatId)}
+                </div>
               </div>
             </div>
           </div>
 
           {/* RIGHT: TICKET STUB / DETACHABLE PORTION (30%) */}
-          <div className="w-[30%] p-6 bg-slate-100 flex flex-col justify-between relative bg-gradient-to-br from-slate-50 to-slate-100">
+          <div className="w-[30%] p-5 bg-white flex flex-col justify-between relative overflow-hidden">
             {/* Corner cutouts for ticket aesthetic */}
-            <div className="absolute -bottom-3 -left-3 w-6 h-6 bg-slate-50 rounded-full border border-slate-200 no-print"></div>
-            <div className="absolute -top-3 -left-3 w-6 h-6 bg-slate-50 rounded-full border border-slate-200 no-print"></div>
+            <div className="absolute -bottom-3 -left-3 w-6 h-6 bg-slate-50 rounded-full border border-slate-300 no-print z-20"></div>
+            <div className="absolute -top-3 -left-3 w-6 h-6 bg-slate-50 rounded-full border border-slate-300 no-print z-20"></div>
 
-            {/* Stub header */}
-            <div className="flex justify-between items-center">
-              <span className="text-[9px] font-bold text-orange-400 uppercase tracking-widest">DETACHABLE STUB</span>
-              <span className="text-[10px] font-extrabold text-slate-900 bg-orange-500/10 px-2 py-0.5 rounded border border-orange-500/20">
-                {formatSeatId(selectedSeatId)}
-              </span>
+            {/* Watermark Logo in Blue */}
+            <div className="absolute inset-0 pointer-events-none select-none z-0 flex items-center justify-center overflow-hidden opacity-[0.10]">
+              <img
+                src="/vector-logo.png"
+                alt="Watermark Logo"
+                className="w-[85%] h-auto object-contain"
+                style={{ filter: 'brightness(0) saturate(100%) invert(14%) sepia(45%) saturate(3000%) hue-rotate(215deg) brightness(95%) contrast(93%)' }}
+              />
             </div>
 
             {/* Stub content details */}
-            <div className="space-y-3 mt-4 flex-1 justify-center flex flex-col">
-              <div>
-                <span className="block text-[8px] uppercase tracking-wider text-slate-500">NAMA</span>
-                <span className="text-xs font-bold text-slate-900 uppercase line-clamp-1">{participant.nama}</span>
-              </div>
-              <div className="grid grid-cols-2 gap-1">
-                <div>
-                  <span className="block text-[8px] uppercase tracking-wider text-slate-500">KELAS</span>
-                  <span className="text-[10px] font-semibold text-slate-700 uppercase">{participant.kategori}</span>
+            <div className="grid grid-cols-2 gap-y-1.5 gap-x-2 relative z-10 px-1 mt-1">
+              <div className="flex flex-col col-span-2">
+                <div className="text-[8px] font-serif lining-nums text-slate-500 tracking-wide leading-tight" style={{ fontFamily: '"Times New Roman", Times, serif' }}>Name</div>
+                <div className="text-[11px] font-serif lining-nums font-bold text-[#1a2c5b] mt-0.5 uppercase break-words leading-tight pb-0.5" style={{ fontFamily: '"Times New Roman", Times, serif' }}>
+                  {participant.nama}
                 </div>
-                <div>
-                  <span className="block text-[8px] uppercase tracking-wider text-slate-500">KODE</span>
-                  <span className="text-[10px] font-bold text-slate-700 font-mono">{participant.booking_code}</span>
+              </div>
+              <div className="flex flex-col col-span-2">
+                <div className="text-[8px] font-serif lining-nums text-slate-500 tracking-wide leading-tight" style={{ fontFamily: '"Times New Roman", Times, serif' }}>Booking Number</div>
+                <div className="text-[11px] font-serif lining-nums font-bold text-[#1a2c5b] mt-0.5 uppercase leading-tight pb-0.5" style={{ fontFamily: '"Times New Roman", Times, serif' }}>
+                  {participant.booking_code}
+                </div>
+              </div>
+              <div className="flex flex-col">
+                <div className="text-[8px] font-serif lining-nums text-slate-500 tracking-wide leading-tight" style={{ fontFamily: '"Times New Roman", Times, serif' }}>Date</div>
+                <div className="text-[11px] font-serif lining-nums font-bold text-[#1a2c5b] mt-0.5 leading-tight pb-0.5" style={{ fontFamily: '"Times New Roman", Times, serif' }}>
+                  11-12 Jun
+                </div>
+              </div>
+              <div className="flex flex-col">
+                <div className="text-[8px] font-serif lining-nums text-slate-500 tracking-wide leading-tight" style={{ fontFamily: '"Times New Roman", Times, serif' }}>Gate</div>
+                <div className="text-[11px] font-serif lining-nums font-bold text-[#1a2c5b] mt-0.5 leading-tight pb-0.5" style={{ fontFamily: '"Times New Roman", Times, serif' }}>
+                  A1
+                </div>
+              </div>
+              <div className="flex flex-col">
+                <div className="text-[8px] font-serif lining-nums text-slate-500 tracking-wide leading-tight" style={{ fontFamily: '"Times New Roman", Times, serif' }}>Boarding</div>
+                <div className="text-[11px] font-serif lining-nums font-bold text-[#1a2c5b] mt-0.5 leading-tight pb-0.5" style={{ fontFamily: '"Times New Roman", Times, serif' }}>
+                  08.00
+                </div>
+              </div>
+              <div className="flex flex-col">
+                <div className="text-[8px] font-serif lining-nums text-slate-500 tracking-wide leading-tight" style={{ fontFamily: '"Times New Roman", Times, serif' }}>Seat</div>
+                <div className="text-[11px] font-serif lining-nums font-bold text-[#1a2c5b] mt-0.5 uppercase leading-tight pb-0.5" style={{ fontFamily: '"Times New Roman", Times, serif' }}>
+                  {formatSeatId(selectedSeatId)}
                 </div>
               </div>
             </div>
 
-            {/* Stub footer logo */}
-            <div className="text-right border-t border-slate-200 pt-3">
-              <span className="text-[8px] font-extrabold text-slate-500 tracking-wider">BOARDING PASS</span>
+            {/* Stub barcode / location scanner */}
+            <div className="flex justify-center mt-1 relative z-10">
+              <div className="p-1 border border-[#1a2c5b]/10 rounded-xl bg-white shadow-sm flex items-center justify-center overflow-hidden">
+                <img
+                  src="/barcode.png"
+                  alt="Scan for Location"
+                  className="w-[95px] h-[95px] object-contain"
+                />
+              </div>
             </div>
           </div>
         </div>
