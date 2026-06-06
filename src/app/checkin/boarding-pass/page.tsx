@@ -160,7 +160,7 @@ export default function BoardingPassPage() {
               />
               <div className="w-[1.5px] h-6 bg-[#1a2c5b]/30 mx-3"></div>
               <span className="font-sans text-xs font-bold text-[#1b2a57] tracking-wider uppercase">
-                {participant.kategori === 'eksekutif' ? 'Executive Class' : 'Business Class'}
+                {participant.kategori === 'eksekutif' ? 'First Class' : 'Business Class'}
               </span>
             </div>
 
