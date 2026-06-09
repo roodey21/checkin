@@ -134,31 +134,31 @@ export default function AdminParticipantBoardingPassPage() {
 
             {/* Background World Map with whitespace padding */}
             <div className="absolute inset-0 pointer-events-none select-none z-0 p-4">
-              <img 
-                src="/aset-peta.png" 
-                alt="Background Map" 
+              <img
+                src="/aset-peta.png"
+                alt="Background Map"
                 className="w-full h-full object-contain opacity-85"
               />
             </div>
 
             {/* Header info */}
             <div className="flex items-center relative z-10">
-              <img 
-                src="/ptpn-airlines.png" 
-                alt="PTPN Airlines Logo" 
+              <img
+                src="/ptpn-airlines.png"
+                alt="PTPN Airlines Logo"
                 className="h-6 object-contain"
               />
               <div className="w-[1.5px] h-6 bg-[#1a2c5b]/30 mx-3"></div>
               <span className="font-sans text-xs font-bold text-[#1b2a57] tracking-wider uppercase">
-                {participant.kategori === 'eksekutif' ? 'Executive Class' : 'Business Class'}
+                {participant.kategori === 'eksekutif' ? 'First Class' : 'Business Class'}
               </span>
             </div>
 
             {/* Center flight route graphic */}
             <div className="flex justify-center my-2 relative z-10">
-              <img 
-                src="/aset-psn-ftr.png" 
-                alt="PSN - FTR" 
+              <img
+                src="/aset-psn-ftr.png"
+                alt="PSN - FTR"
                 className="h-[52px] object-contain"
               />
             </div>
@@ -212,9 +212,9 @@ export default function AdminParticipantBoardingPassPage() {
 
             {/* Watermark Logo in Blue */}
             <div className="absolute inset-0 pointer-events-none select-none z-0 flex items-center justify-center overflow-hidden opacity-85">
-              <img 
-                src="/aset-logo.png" 
-                alt="Watermark Logo" 
+              <img
+                src="/aset-logo.png"
+                alt="Watermark Logo"
                 className="w-[85%] h-auto object-contain"
               />
             </div>
@@ -262,9 +262,9 @@ export default function AdminParticipantBoardingPassPage() {
             {/* Stub barcode / location scanner */}
             <div className="flex justify-center mt-1 relative z-10">
               <div className="p-1 border border-[#1a2c5b]/10 rounded-xl bg-white shadow-sm flex items-center justify-center overflow-hidden">
-                <img 
-                  src="/barcode.png" 
-                  alt="Scan for Location" 
+                <img
+                  src="/barcode.png"
+                  alt="Scan for Location"
                   className="w-[95px] h-[95px] object-contain"
                 />
               </div>
