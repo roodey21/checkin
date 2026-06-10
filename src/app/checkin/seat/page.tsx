@@ -484,11 +484,11 @@ export default function SeatSelectionPage() {
                                   }}
                                   className={`
                                     rounded-full text-[9px] font-extrabold flex items-center justify-center transition-all z-20 shadow-sm
-                                    ${status === 'available' && isChairEligible && 'bg-white border border-slate-300 text-slate-850 hover:border-orange-500 hover:bg-orange-50 hover:text-orange-600 hover:scale-105'}
+                                    ${status === 'available' && isChairEligible && 'bg-slate-100 border border-slate-400 text-slate-850 hover:border-orange-500 hover:bg-orange-50 hover:text-orange-600 hover:scale-105'}
                                     ${status === 'available' && !isChairEligible && 'bg-slate-100 border border-slate-200 text-slate-400 cursor-not-allowed'}
                                     ${status === 'selected' && 'bg-blue-600 border border-blue-400 text-white animate-pulse-ring ring-1 ring-blue-500/30'}
                                     ${status === 'locked' && 'bg-amber-500 border border-amber-600 text-white cursor-not-allowed'}
-                                    ${status === 'booked' && 'bg-red-600 border border-red-700 text-white cursor-not-allowed'}
+                                    ${status === 'booked' && 'bg-red-650 border border-red-750 text-white cursor-not-allowed'}
                                   `}
                                   title={`${seat.row_name} - ${seat.table_name} - Kursi ${seat.seat_number}`}
                                 >

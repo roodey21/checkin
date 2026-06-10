@@ -363,15 +363,15 @@ export default function AdminSeatsPrintPage() {
           {/* Interactive Legends (Only visible on web, clean style on print) */}
           <div className="w-full flex justify-center gap-6 mb-8 text-xs font-semibold flex-wrap">
             <div className="flex items-center gap-2">
-              <div className="w-3.5 h-3.5 rounded-full bg-white border border-slate-300"></div>
+              <div className="w-3.5 h-3.5 rounded-full bg-slate-100 border border-slate-400"></div>
               <span className="text-slate-700">Tersedia</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-3.5 h-3.5 rounded-full bg-amber-500 border border-amber-600"></div>
+              <div className="w-3.5 h-3.5 rounded-full bg-white border-2 border-amber-500"></div>
               <span className="text-slate-700 font-semibold">Sedang Dipilih (Lock)</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-3.5 h-3.5 rounded-full bg-red-600 border border-red-700"></div>
+              <div className="w-3.5 h-3.5 rounded-full bg-white border-2 border-red-600"></div>
               <span className="text-slate-700 font-semibold">Sudah Terisi (Booked)</span>
             </div>
           </div>
@@ -449,10 +449,10 @@ export default function AdminSeatsPrintPage() {
                                 height: `${size}px`,
                               }}
                               className={`
-                                rounded-full text-[9px] font-black flex items-center justify-center z-20 shadow-sm border print-force-colors transition-all cursor-help
-                                ${status === 'available' && 'bg-white border-slate-350 text-slate-800'}
-                                ${status === 'locked' && 'bg-amber-500 border-amber-600 text-white'}
-                                ${status === 'booked' && 'bg-red-650 border-red-850 text-white'}
+                                rounded-full text-[9px] font-black flex items-center justify-center z-20 shadow-sm border transition-all cursor-help
+                                ${status === 'available' && 'bg-slate-100 border-slate-400 text-slate-800'}
+                                ${status === 'locked' && 'bg-white border-amber-500 text-amber-600 print:border-amber-600'}
+                                ${status === 'booked' && 'bg-white border-red-650 text-red-650 print:border-red-650'}
                               `}
                               title={occupant || `${seat.row_name} - ${seat.table_name} - Kursi ${seat.seat_number} (Tersedia)`}
                             >
