@@ -492,11 +492,7 @@ export default function SeatSelectionPage() {
                                   `}
                                   title={`${seat.row_name} - ${seat.table_name} - Kursi ${seat.seat_number}`}
                                 >
-                                  {status === 'booked' ? (
-                                    <Check className="w-2.5 h-2.5" />
-                                  ) : (
-                                    <span>{seat.seat_number}</span>
-                                  )}
+                                  <span>{seat.seat_number}</span>
                                 </button>
                               );
                             })}
