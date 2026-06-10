@@ -3,6 +3,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import html2canvas from 'html2canvas';
+import JSZip from 'jszip';
 import {
   checkAdminSessionAction,
   adminLogoutAction,
@@ -43,6 +45,17 @@ interface ParticipantDisplay {
   seatId: string | null;
 }
 
+const formatSeatId = (id: string) => {
+  if (!id) return '';
+  const parts = id.split('-');
+  if (parts.length >= 4) {
+    const table = parts[2].replace(/[T|Meja\s]/g, '');
+    const seat = parts[3].replace('S', '');
+    return `${table}-${seat}`;
+  }
+  return id;
+};
+
 export default function AdminDashboardPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
@@ -52,6 +65,12 @@ export default function AdminDashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Bulk Download States
+  const [bulkDownloading, setBulkDownloading] = useState(false);
+  const [bulkProgress, setBulkProgress] = useState({ current: 0, total: 0 });
+  const [activePrintParticipant, setActivePrintParticipant] = useState<ParticipantDisplay | null>(null);
+  const offscreenRendererRef = useRef<HTMLDivElement>(null);
 
   // Participant Manual Delete State and Handler
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
@@ -230,6 +249,77 @@ export default function AdminDashboardPage() {
     }
   };
 
+  // Bulk download checked-in participants tickets in ZIP
+  const handleBulkDownloadTickets = async () => {
+    const checkedInParticipants = participants.filter((p) => p.checkedIn && p.seatId);
+    if (checkedInParticipants.length === 0) {
+      setError('Tidak ada peserta yang sudah check-in untuk diunduh tiketnya.');
+      return;
+    }
+
+    setBulkDownloading(true);
+    setError(null);
+    setSuccessMsg(null);
+    const total = checkedInParticipants.length;
+    setBulkProgress({ current: 0, total });
+
+    const zip = new JSZip();
+
+    try {
+      for (let i = 0; i < total; i++) {
+        const participant = checkedInParticipants[i];
+        
+        // Render current participant in offscreen DOM
+        setActivePrintParticipant(participant);
+        setBulkProgress({ current: i + 1, total });
+
+        // Wait for render and image loading to execute completely
+        await new Promise((resolve) => setTimeout(resolve, 300));
+
+        const element = offscreenRendererRef.current;
+        if (!element) {
+          throw new Error('Renderer elemen tidak ditemukan.');
+        }
+
+        const canvas = await html2canvas(element, {
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#ffffff',
+          logging: false,
+        });
+
+        const imgData = canvas.toDataURL('image/jpeg', 0.95);
+        const base64Data = imgData.split(',')[1];
+
+        const cleanName = participant.nama.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '_');
+        const cleanClass = participant.kategori.toUpperCase();
+        const formattedSeat = formatSeatId(participant.seatId || '').replace('-', '_');
+        const filename = `${cleanClass}_Seat_${formattedSeat}_${cleanName}.jpg`;
+
+        zip.file(filename, base64Data, { base64: true });
+      }
+
+      const content = await zip.generateAsync({ type: 'blob' });
+      const url = URL.createObjectURL(content);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Tiket_Boarding_Pass_Bulk_${new Date().toISOString().slice(0, 10)}.zip`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      setSuccessMsg(`Berhasil mengunduh ${total} tiket dalam bentuk ZIP.`);
+    } catch (err: any) {
+      console.error('Bulk download error:', err);
+      setError(err.message || 'Gagal mengunduh bulk tiket.');
+    } finally {
+      setBulkDownloading(false);
+      setActivePrintParticipant(null);
+    }
+  };
+
   // Filter participants by search term
   const filteredParticipants = participants.filter(
     (p) =>
@@ -396,6 +486,25 @@ export default function AdminDashboardPage() {
             )}
             <span>Kirim Email Undangan</span>
           </button>
+
+          {/* Cetak Bulk (.zip) */}
+          <button
+            onClick={handleBulkDownloadTickets}
+            disabled={actionLoading !== null || bulkDownloading || participants.filter((p) => p.checkedIn && p.seatId).length === 0}
+            className="flex items-center justify-center gap-2 px-5 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl text-sm transition-all shadow-lg hover:shadow-emerald-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {bulkDownloading ? (
+              <>
+                <Loader2 className="w-4.5 h-4.5 animate-spin" />
+                <span>Memproses ({bulkProgress.current}/{bulkProgress.total})</span>
+              </>
+            ) : (
+              <>
+                <Printer className="w-4.5 h-4.5" />
+                <span>Cetak Bulk (.zip)</span>
+              </>
+            )}
+          </button>
         </div>
 
         {/* CSV Format Note */}
@@ -553,6 +662,162 @@ export default function AdminDashboardPage() {
               )}
               <span>Ya, Hapus</span>
             </button>
+          </div>
+        </div>
+      </div>
+    )}
+
+    {/* Hidden offscreen renderer for bulk download */}
+    {activePrintParticipant && (
+      <div 
+        style={{ 
+          position: 'absolute', 
+          left: '-9999px', 
+          top: '0', 
+          zIndex: -100,
+          pointerEvents: 'none'
+        }}
+      >
+        <div
+          ref={offscreenRendererRef}
+          className="w-[780px] h-[290px] bg-white rounded-3xl border border-slate-300 shadow-none flex overflow-hidden shrink-0 relative"
+          style={{ fontFamily: 'sans-serif' }}
+        >
+          {/* LEFT: MAIN PASSENGER BOARDING CARD (70%) */}
+          <div className="w-[70%] p-6 flex flex-col justify-between relative border-r-2 border-dotted border-slate-300 overflow-hidden bg-white">
+            {/* Background World Map with whitespace padding */}
+            <div className="absolute inset-0 pointer-events-none select-none z-0 p-4">
+              <img
+                src="/aset-peta.png"
+                alt="Background Map"
+                className="w-full h-full object-contain opacity-85"
+              />
+            </div>
+
+            {/* Header info */}
+            <div className="flex items-center relative z-10">
+              <img
+                src="/ptpn-airlines.png"
+                alt="PTPN Airlines Logo"
+                className="h-6 object-contain"
+              />
+              <div className="w-[1.5px] h-6 bg-[#1a2c5b]/30 mx-3"></div>
+              <span className="font-sans text-xs font-bold text-[#1b2a57] tracking-wider uppercase">
+                {activePrintParticipant.kategori === 'eksekutif' ? 'First Class' : 'Business Class'}
+              </span>
+            </div>
+
+            {/* Center flight route graphic */}
+            <div className="flex justify-center my-2 relative z-10">
+              <img
+                src="/aset-psn-ftr.png"
+                alt="PSN - FTR"
+                className="h-[52px] object-contain"
+              />
+            </div>
+
+            {/* Middle passenger info */}
+            <div className="grid grid-cols-2 gap-y-3 gap-x-6 relative z-10 px-2 mt-2">
+              <div className="flex flex-col">
+                <div className="text-[10px] font-serif lining-nums text-slate-500 tracking-wide leading-normal" style={{ fontFamily: '"Times New Roman", Times, serif' }}>Name</div>
+                <div className="text-sm font-serif lining-nums font-bold text-[#1a2c5b] mt-0.5 truncate uppercase leading-normal pb-0.5" style={{ fontFamily: '"Times New Roman", Times, serif' }}>
+                  {activePrintParticipant.nama}
+                </div>
+              </div>
+              <div className="flex flex-col">
+                <div className="text-[10px] font-serif lining-nums text-slate-500 tracking-wide leading-normal" style={{ fontFamily: '"Times New Roman", Times, serif' }}>Booking Number</div>
+                <div className="text-sm font-serif lining-nums font-bold text-[#1a2c5b] mt-0.5 uppercase leading-normal pb-0.5" style={{ fontFamily: '"Times New Roman", Times, serif' }}>
+                  {activePrintParticipant.booking_code}
+                </div>
+              </div>
+              <div className="flex flex-col">
+                <div className="text-[10px] font-serif lining-nums text-slate-500 tracking-wide leading-normal" style={{ fontFamily: '"Times New Roman", Times, serif' }}>Date</div>
+                <div className="text-sm font-serif lining-nums font-bold text-[#1a2c5b] mt-0.5 leading-normal pb-0.5" style={{ fontFamily: '"Times New Roman", Times, serif' }}>
+                  11 - 12 Juni 2026
+                </div>
+              </div>
+              <div className="flex flex-col">
+                <div className="text-[10px] font-serif lining-nums text-slate-500 tracking-wide leading-normal" style={{ fontFamily: '"Times New Roman", Times, serif' }}>Gate</div>
+                <div className="text-sm font-serif lining-nums font-bold text-[#1a2c5b] mt-0.5 leading-normal pb-0.5" style={{ fontFamily: '"Times New Roman", Times, serif' }}>
+                  A1
+                </div>
+              </div>
+              <div className="flex flex-col">
+                <div className="text-[10px] font-serif lining-nums text-slate-500 tracking-wide leading-normal" style={{ fontFamily: '"Times New Roman", Times, serif' }}>Boarding</div>
+                <div className="text-sm font-serif lining-nums font-bold text-[#1a2c5b] mt-0.5 leading-normal pb-0.5" style={{ fontFamily: '"Times New Roman", Times, serif' }}>
+                  08.00 WIB
+                </div>
+              </div>
+              <div className="flex flex-col">
+                <div className="text-[10px] font-serif lining-nums text-slate-500 tracking-wide leading-normal" style={{ fontFamily: '"Times New Roman", Times, serif' }}>Seat</div>
+                <div className="text-sm font-serif lining-nums font-bold text-[#1a2c5b] mt-0.5 uppercase leading-normal pb-0.5" style={{ fontFamily: '"Times New Roman", Times, serif' }}>
+                  {formatSeatId(activePrintParticipant.seatId || '')}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* RIGHT: TICKET STUB / DETACHABLE PORTION (30%) */}
+          <div className="w-[30%] p-5 bg-white flex flex-col justify-between relative overflow-hidden">
+            {/* Watermark Logo in Blue */}
+            <div className="absolute inset-0 pointer-events-none select-none z-0 flex items-center justify-center overflow-hidden opacity-85">
+              <img
+                src="/aset-logo.png"
+                alt="Watermark Logo"
+                className="w-[85%] h-auto object-contain"
+              />
+            </div>
+
+            {/* Stub content details */}
+            <div className="grid grid-cols-2 gap-y-1.5 gap-x-2 relative z-10 px-1 mt-1">
+              <div className="flex flex-col col-span-2">
+                <div className="text-[8px] font-serif lining-nums text-slate-500 tracking-wide leading-tight" style={{ fontFamily: '"Times New Roman", Times, serif' }}>Name</div>
+                <div className="text-[11px] font-serif lining-nums font-bold text-[#1a2c5b] mt-0.5 uppercase break-words leading-tight pb-0.5" style={{ fontFamily: '"Times New Roman", Times, serif' }}>
+                  {activePrintParticipant.nama}
+                </div>
+              </div>
+              <div className="flex flex-col col-span-2">
+                <div className="text-[8px] font-serif lining-nums text-slate-500 tracking-wide leading-tight" style={{ fontFamily: '"Times New Roman", Times, serif' }}>Booking Number</div>
+                <div className="text-[11px] font-serif lining-nums font-bold text-[#1a2c5b] mt-0.5 uppercase leading-tight pb-0.5" style={{ fontFamily: '"Times New Roman", Times, serif' }}>
+                  {activePrintParticipant.booking_code}
+                </div>
+              </div>
+              <div className="flex flex-col">
+                <div className="text-[8px] font-serif lining-nums text-slate-500 tracking-wide leading-tight" style={{ fontFamily: '"Times New Roman", Times, serif' }}>Date</div>
+                <div className="text-[11px] font-serif lining-nums font-bold text-[#1a2c5b] mt-0.5 leading-tight pb-0.5" style={{ fontFamily: '"Times New Roman", Times, serif' }}>
+                  11-12 Jun
+                </div>
+              </div>
+              <div className="flex flex-col">
+                <div className="text-[8px] font-serif lining-nums text-slate-500 tracking-wide leading-tight" style={{ fontFamily: '"Times New Roman", Times, serif' }}>Gate</div>
+                <div className="text-[11px] font-serif lining-nums font-bold text-[#1a2c5b] mt-0.5 leading-tight pb-0.5" style={{ fontFamily: '"Times New Roman", Times, serif' }}>
+                  A1
+                </div>
+              </div>
+              <div className="flex flex-col">
+                <div className="text-[8px] font-serif lining-nums text-slate-500 tracking-wide leading-tight" style={{ fontFamily: '"Times New Roman", Times, serif' }}>Boarding</div>
+                <div className="text-[11px] font-serif lining-nums font-bold text-[#1a2c5b] mt-0.5 leading-tight pb-0.5" style={{ fontFamily: '"Times New Roman", Times, serif' }}>
+                  08.00
+                </div>
+              </div>
+              <div className="flex flex-col">
+                <div className="text-[8px] font-serif lining-nums text-slate-500 tracking-wide leading-tight" style={{ fontFamily: '"Times New Roman", Times, serif' }}>Seat</div>
+                <div className="text-[11px] font-serif lining-nums font-bold text-[#1a2c5b] mt-0.5 uppercase leading-tight pb-0.5" style={{ fontFamily: '"Times New Roman", Times, serif' }}>
+                  {formatSeatId(activePrintParticipant.seatId || '')}
+                </div>
+              </div>
+            </div>
+
+            {/* Stub barcode / location scanner */}
+            <div className="flex justify-center mt-1 relative z-10">
+              <div className="p-1 border border-[#1a2c5b]/10 rounded-xl bg-white shadow-sm flex items-center justify-center overflow-hidden">
+                <img
+                  src="/barcode.png"
+                  alt="Scan for Location"
+                  className="w-[95px] h-[95px] object-contain"
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>
